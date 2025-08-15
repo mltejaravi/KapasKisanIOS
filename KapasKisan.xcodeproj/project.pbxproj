@@ -24,15 +24,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CAA82D472E4F50A600B1BE8D /* KapasKisan-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "KapasKisan-Info.plist"; sourceTree = "<group>"; };
 		CAF85FB12E4E256000F3FD71 /* KapasKisan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KapasKisan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF85FBE2E4E256100F3FD71 /* KapasKisanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KapasKisanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF85FC82E4E256100F3FD71 /* KapasKisanUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KapasKisanUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CAF85FB32E4E256000F3FD71 /* KapasKisan */ = {
+		CA87C99D2E4F228100B8632B /* Network */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = KapasKisan;
+			path = Network;
 			sourceTree = "<group>";
 		};
 		CAF85FC12E4E256100F3FD71 /* KapasKisanTests */ = {
@@ -75,7 +76,8 @@
 		CAF85FA82E4E256000F3FD71 = {
 			isa = PBXGroup;
 			children = (
-				CAF85FB32E4E256000F3FD71 /* KapasKisan */,
+				CAA82D472E4F50A600B1BE8D /* KapasKisan-Info.plist */,
+				CA87C99D2E4F228100B8632B /* Network */,
 				CAF85FC12E4E256100F3FD71 /* KapasKisanTests */,
 				CAF85FCB2E4E256100F3FD71 /* KapasKisanUITests */,
 				CAF85FB22E4E256000F3FD71 /* Products */,
@@ -108,7 +110,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CAF85FB32E4E256000F3FD71 /* KapasKisan */,
+				CA87C99D2E4F228100B8632B /* Network */,
 			);
 			name = KapasKisan;
 			packageProductDependencies = (
@@ -397,6 +399,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "KapasKisan-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -424,6 +428,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "KapasKisan-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
