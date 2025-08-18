@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    @State private var navigateToLogin:Bool = false
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -13,7 +15,7 @@ struct HomeView: View {
                         CardView {
                             VStack(spacing: 16) {
                                 // App logo and title
-                                Text("Kapas Mitra")
+                                Text("Kapas Kisan")
                                     .font(.system(size: 25, weight: .bold))
                                     .foregroundColor(.black)
                                     .padding(.bottom, 12)
@@ -84,7 +86,9 @@ struct HomeView: View {
                                     iconName: "rectangle.portrait.and.arrow.right",
                                     buttonText: "Logout",
                                     buttonColor: Color(red: 211/255, green: 47/255, blue: 47/255),
-                                    action: {}
+                                    action: {
+                                        navigateToLogin = true
+                                    }
                                 )
                                 
                                 // Bottom logo
@@ -110,6 +114,8 @@ struct HomeView: View {
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
         }
+        .background(NavigationLink("",destination:LoginView(),
+                                   isActive:$navigateToLogin).hidden())
     }
 }
 

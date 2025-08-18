@@ -8,7 +8,9 @@ struct LoginView: View {
     @State private var showInvalidMobileWarning = false
     @State private var navigateToSelectProfile = false
     @State private var showInvalidOtpWarning = false
-    @State private var timer:Int = 180
+    @State private var showNoInternetAlert = false
+    @State private var isOTPTimerActive = false
+    @State private var secondsRemaining = 180
     
     var body: some View {
         NavigationView {
@@ -77,17 +79,16 @@ struct LoginView: View {
                             
                             Button(action: {
                                 if txtMobileNumber.count != 10 {
-                                    withAnimation {
-                                        showInvalidMobileWarning = true
-                                    }
+                                    withAnimation { showInvalidMobileWarning = true }
                                     return
                                 }
-                                
                                 showInvalidMobileWarning = false
-                                withAnimation {
-                                    showOtpField = true
-                                }
+                                withAnimation { showOtpField = true }
                                 
+                                // start countdown
+                                isOTPTimerActive = true
+                                secondsRemaining = 180
+
                                 Task {
                                     generatedOTP = generateOtp(testMode: false)
                                     if let token = await sendLoginRequest() {
@@ -95,12 +96,10 @@ struct LoginView: View {
                                             phoneNumber: txtMobileNumber,
                                             otp: generatedOTP
                                         )
-                                        
                                         ApiService.shared.sendSms(token: token, smsRequest: smsRequest) { result in
                                             switch result {
                                             case .success(let smsResponse):
                                                 print("Status: \(smsResponse.status)")
-                                                print("Result: \(smsResponse.result)")
                                             case .failure(let error):
                                                 print("Failed to send SMS: \(error.localizedDescription)")
                                             }
@@ -109,14 +108,22 @@ struct LoginView: View {
                                         print("Login failed")
                                     }
                                 }
-                                
                             }) {
-                                Text("Generate OTP")
+                                Text(isOTPTimerActive ? "Wait \(secondsRemaining)s" : "Generate OTP")
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 48)
-                                    .background(Color.blue)
+                                    .background(isOTPTimerActive ? Color.gray : Color.blue)
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
+                            }
+                            .disabled(isOTPTimerActive)
+                            .onReceive(timer) { _ in
+                                if isOTPTimerActive && secondsRemaining > 0 {
+                                    secondsRemaining -= 1
+                                }
+                                if secondsRemaining == 0 {
+                                    isOTPTimerActive = false
+                                }
                             }
                             
                             if showOtpField {
@@ -124,6 +131,7 @@ struct LoginView: View {
                                     if txtOtp == generatedOTP {
                                         showInvalidOtpWarning = false
                                         navigateToSelectProfile = true
+                                        SessionManager.shared.mobileNumber = txtMobileNumber
                                     } else {
                                         showInvalidOtpWarning = true
                                     }
@@ -171,6 +179,20 @@ struct LoginView: View {
                 .padding(.bottom, 16)
             }
             .navigationBarHidden(true)
+            .alert(isPresented: $showNoInternetAlert) {
+                Alert(
+                    title: Text("No Internet"),
+                    message: Text("Please check your connection and try again."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .onAppear{
+                NetworkManager.shared.checkConnection { isConnected in
+                    if !isConnected {
+                        showNoInternetAlert = true
+                    }
+                }
+            }
         }
     }
 }
@@ -192,10 +214,18 @@ func sendLoginRequest() async -> String? {
     }
 }
 
+let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
 func generateOtp(testMode: Bool = false) -> String {
     if testMode {
         return "0000"
     }
     let otp = Int.random(in: 1000...9999)
     return String(otp)
+}
+
+struct LoginView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoginView()
+    }
 }

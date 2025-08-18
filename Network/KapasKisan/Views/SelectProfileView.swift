@@ -2,7 +2,11 @@ import SwiftUI
 
 struct SelectProfileView: View {
     @State private var selectedBarcode: String = ""
-    let barcodes = ["Barcode 1", "Barcode 2", "Barcode 3"] // Sample data
+    @State private var showNoInternetAlert = false
+    @State private var barcodes:[String] = []
+    @State private var isUserLoggedIn: Bool = false
+    @State private var navigateToLogin:Bool = false
+    @State private var navigateToHome:Bool = false
     
     var body: some View {
         NavigationView {
@@ -16,7 +20,7 @@ struct SelectProfileView: View {
                         VStack(spacing: 16) {
                             // Title section
                             VStack {
-                                Text("Kapas Mitra")
+                                Text("Kapas Kisan")
                                     .font(.system(size: 28, weight: .bold))
                                     .foregroundColor(.black)
                                 
@@ -105,19 +109,30 @@ struct SelectProfileView: View {
                                         .padding(.trailing, 12)
                                     
                                     Button(action: {
-                                        // Logout action
+                                        // Clear session
+                                        SessionManager.shared.authToken = nil
+                                        SessionManager.shared.mobileNumber = nil
+                                        // Trigger navigation
+                                        navigateToLogin = true
                                     }) {
                                         Text("Logout")
                                             .font(.system(size: 16))
                                             .frame(maxWidth: .infinity)
                                             .frame(height: 48)
+                                            .foregroundColor(.white)
+                                            .background(Color.red)
+                                            .cornerRadius(8)
                                     }
                                     .buttonStyle(PlainButtonStyle())
-                                    .background(Color.red)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
                                 }
                                 .padding(16)
+                                
+                                // Hidden navigation link
+                                NavigationLink(
+                                    destination: LoginView(),
+                                    isActive: $navigateToLogin,
+                                    label: { EmptyView() }
+                                )
                             }
                             
                             // Bottom logo
@@ -140,7 +155,50 @@ struct SelectProfileView: View {
                 .padding(16)
             }
             .navigationBarHidden(true)
+            .alert(isPresented: $showNoInternetAlert) {
+                Alert(
+                    title: Text("No Internet"),
+                    message: Text("Please check your connection and try again."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }.onAppear{
+            NetworkManager.shared.checkConnection { isConnected in
+                    if !isConnected {
+                        showNoInternetAlert = true
+                    }
+                }
+                
+                if !SessionManager.shared.checkSession() {
+                    navigateToLogin = true
+                }
+                
+                if let token = SessionManager.shared.authToken,
+                   let mobileNumber = SessionManager.shared.mobileNumber {
+                    ApiService.shared.getBarcodesByMobileNumber(token: token, mobileNumber: mobileNumber) { result in
+                        switch result {
+                        case .success(let barcodesResult):
+                            DispatchQueue.main.async {
+                                if(barcodesResult.count > 1){
+                                    self.barcodes = barcodesResult.map { $0.barCode }
+                                    if let first = self.barcodes.first {
+                                        self.selectedBarcode = first
+                                    }
+                                }
+                                else{
+                                    self.navigateToHome = true
+                                }
+                            }
+                        case .failure(let error):
+                            print("Failed to fetch barcodes: \(error)")
+                        }
+                    }
+                }
         }
+        .background(NavigationLink("",destination:HomeView(),
+                                   isActive:$navigateToHome).hidden())
+        .background(NavigationLink("",destination:LoginView(),
+                                   isActive:$navigateToLogin).hidden())
     }
 }
 
