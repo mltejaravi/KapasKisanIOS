@@ -15,6 +15,7 @@ struct SlotInfoView: View {
         SlotInfo(date: "2023-05-16", time: "11:00 AM", status: "Pending", details: "Market: APMC2, Mill: Mill2"),
         SlotInfo(date: "2023-05-17", time: "02:00 PM", status: "Completed", details: "Market: APMC3, Mill: Mill3")
     ]
+    @State private var gotoHome:Bool = false
     
     var body: some View {
         NavigationView {
@@ -31,16 +32,18 @@ struct SlotInfoView: View {
                     
                     // Header with back button and title
                     HStack {
-                        Button(action: {
-                            // Back action
-                        }) {
-                            Image(systemName: "arrow.backward")
-                                .font(.system(size: 24))
-                                .foregroundColor(.black)
-                                .frame(width: 48, height: 48)
-                                .contentShape(Rectangle())
+                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
+                            Button(action: {
+                                gotoHome = true
+                            }) {
+                                Image(systemName: "arrow.backward")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.black)
+                                    .frame(width: 60, height: 60)
+                                    .contentShape(Rectangle())
+                            }
+                            .padding(.leading, 12)
                         }
-                        .padding(.leading, 16)
                         
                         Text("Slot Booking Information")
                             .font(.system(size: 25, weight: .bold))
@@ -86,6 +89,7 @@ struct SlotInfoView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

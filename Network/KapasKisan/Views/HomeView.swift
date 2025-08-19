@@ -1,97 +1,139 @@
 import SwiftUI
 
+// MARK: - Home View
 struct HomeView: View {
-    @State private var navigateToLogin:Bool = false
+    @State private var navigateToLogin: Bool = false
     
     var body: some View {
         NavigationView {
             ZStack {
-                // Background color
-                Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all)
+                // Background
+                Color.blue.opacity(0.1)
+                    .edgesIgnoringSafeArea(.all)
                 
                 ScrollView {
                     VStack(spacing: 0) {
+                        
                         // Main content card
                         CardView {
                             VStack(spacing: 16) {
-                                // App logo and title
+                                
+                                // Title
                                 Text("Kapas Kisan")
                                     .font(.system(size: 25, weight: .bold))
                                     .foregroundColor(.black)
                                     .padding(.bottom, 12)
                                 
-                                // Registration status (hidden by default)
-                                Text("Farmer Registration")
-                                    .font(.system(size: 32, weight: .bold))
-                                    .foregroundColor(Color(red: 51/255, green: 51/255, blue: 51/255))
-                                    .padding(.bottom, 24)
-                                    .hidden()
-                                
                                 Text("Registration Status")
                                     .font(.system(size: 16))
-                                    .foregroundColor(Color(red: 102/255, green: 102/255, blue: 102/255))
+                                    .foregroundColor(.gray)
                                     .padding(.bottom, 16)
                                 
-                                // Action buttons with improved SF Symbols
+                                // Menu options
                                 MenuCard(
                                     iconName: "person.crop.circle",
                                     buttonText: "Change Profile",
                                     buttonColor: .blue,
-                                    action: {}
+                                    destination: SelectProfileView()
                                 )
                                 
                                 MenuCard(
                                     iconName: "person.badge.plus",
                                     buttonText: "Register Now",
                                     buttonColor: .green,
-                                    action: {}
+                                    destination: RegistrationView()
                                 )
                                 
                                 MenuCard(
                                     iconName: "calendar.badge.clock",
                                     buttonText: "Book a Slot",
                                     buttonColor: .blue,
-                                    action: {}
+                                    destination: SlotBookingView()
                                 )
                                 
                                 MenuCard(
                                     iconName: "plus.viewfinder",
                                     buttonText: "Add Land",
                                     buttonColor: .blue,
-                                    action: {}
+                                    destination: AddLandView()
                                 )
                                 
                                 MenuCard(
                                     iconName: "info.square",
                                     buttonText: "Slot Information",
                                     buttonColor: .blue,
-                                    action: {}
+                                    destination: SlotInfoView()
                                 )
                                 
-                                MenuCard(
-                                    iconName: "chart.bar.doc.horizontal",
-                                    buttonText: "Sales Information",
-                                    buttonColor: .blue,
-                                    action: {}
-                                )
+                                // Sales Info (no navigation yet)
+                                CardView(cornerRadius: 12, elevation: 4) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "chart.bar.doc.horizontal")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 24, height: 24)
+                                            .padding(8)
+                                            .background(Color.blue.opacity(0.2))
+                                            .foregroundColor(.blue)
+                                            .cornerRadius(8)
+                                            .padding(.trailing, 8)
+                                        
+                                        Text("Sales Information")
+                                            .font(.system(size: 18, weight: .medium))
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 48)
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(8)
+                                    }
+                                    .padding(16)
+                                }
+                                .padding(.bottom, 16)
                                 
                                 MenuCard(
                                     iconName: "info.circle",
                                     buttonText: "About Us",
-                                    buttonColor: Color(red: 1, green: 193/255, blue: 7/255),
-                                    action: {}
+                                    buttonColor: Color.orange,
+                                    destination: AboutView()
                                 )
                                 
-                                MenuCard(
-                                    iconName: "rectangle.portrait.and.arrow.right",
-                                    buttonText: "Logout",
-                                    buttonColor: Color(red: 211/255, green: 47/255, blue: 47/255),
-                                    action: {
+                                // Logout
+                                NavigationLink(
+                                    destination: LoginView()
+                                        .navigationBarBackButtonHidden(true),
+                                    isActive: $navigateToLogin
+                                ) {
+                                    Button(action: {
+                                        SessionManager.shared.authToken = nil
+                                        SessionManager.shared.mobileNumber = nil
                                         navigateToLogin = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 24, height: 24)
+                                                .padding(8)
+                                                .background(Color.red.opacity(0.2))
+                                                .foregroundColor(.red)
+                                                .cornerRadius(8)
+                                                .padding(.trailing, 8)
+                                            
+                                            Text("Logout")
+                                                .font(.system(size: 18, weight: .medium))
+                                                .frame(maxWidth: .infinity)
+                                                .frame(height: 48)
+                                                .background(Color.red)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(8)
+                                        }
+                                        .padding(16)
                                     }
-                                )
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                                .padding(.bottom, 16)
                                 
-                                // Bottom logo
+                                // Bottom Logo
                                 CardView(
                                     cornerRadius: 16,
                                     elevation: 6,
@@ -111,24 +153,23 @@ struct HomeView: View {
                     .padding(8)
                 }
             }
-            .navigationBarTitle("", displayMode: .inline)
-            .navigationBarHidden(true)
+            .navigationBarHidden(true) // Hide default nav bar
+            .navigationBarBackButtonHidden(true) // Hide back button globally
         }
-        .background(NavigationLink("",destination:LoginView(),
-                                   isActive:$navigateToLogin).hidden())
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
-struct MenuCard: View {
+// MARK: - Reusable MenuCard
+struct MenuCard<Destination: View>: View {
     let iconName: String
     let buttonText: String
     let buttonColor: Color
-    let action: () -> Void
+    let destination: Destination
     
     var body: some View {
-        CardView(cornerRadius: 12, elevation: 4) {
+        NavigationLink(destination: destination.navigationBarBackButtonHidden(true)) {
             HStack(spacing: 10) {
-                // Improved icon styling
                 Image(systemName: iconName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -139,23 +180,22 @@ struct MenuCard: View {
                     .cornerRadius(8)
                     .padding(.trailing, 8)
                 
-                Button(action: action) {
-                    Text(buttonText)
-                        .font(.system(size: 18, weight: .medium))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .background(buttonColor)
-                .foregroundColor(.white)
-                .cornerRadius(8)
+                Text(buttonText)
+                    .font(.system(size: 18, weight: .medium))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(buttonColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
             }
             .padding(16)
         }
+        .buttonStyle(PlainButtonStyle())
         .padding(.bottom, 16)
     }
 }
 
+// MARK: - Preview
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()

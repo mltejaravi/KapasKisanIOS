@@ -15,6 +15,7 @@ struct SlotBookingView: View {
     let markets = ["Market 1", "Market 2", "Market 3"]
     let mills = ["Mill 1", "Mill 2", "Mill 3"]
     let availableSlots = ["9:00 AM", "11:00 AM", "2:00 PM", "4:00 PM"]
+    @State private var gotoHome:Bool = false
     
     var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -37,16 +38,18 @@ struct SlotBookingView: View {
                     
                     // Header with back button and title
                     HStack {
-                        Button(action: {
-                            // Back action
-                        }) {
-                            Image(systemName: "arrow.backward")
-                                .font(.system(size: 24))
-                                .foregroundColor(.black)
-                                .frame(width: 48, height: 48)
-                                .contentShape(Rectangle())
+                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
+                            Button(action: {
+                                gotoHome = true
+                            }) {
+                                Image(systemName: "arrow.backward")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.black)
+                                    .frame(width: 60, height: 60)
+                                    .contentShape(Rectangle())
+                            }
+                            .padding(.leading, 12)
                         }
-                        .padding(.leading, 16)
                         
                         Text("Book Your Slot")
                             .font(.system(size: 28, weight: .bold))
@@ -229,6 +232,7 @@ struct SlotBookingView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

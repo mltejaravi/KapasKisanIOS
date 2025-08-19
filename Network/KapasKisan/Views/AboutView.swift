@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AboutView: View {
+    @State private var gotoHome:Bool = false
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -11,17 +13,18 @@ struct AboutView: View {
                     VStack(spacing: 0) {
                         // Back button - will be hidden by navigation bar
                         HStack {
-                            Button(action: {
-                                // Back action
-                            }) {
-                                Image(systemName: "arrow.backward")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.black)
-                                    .frame(width: 60, height: 60)
-                                    .contentShape(Rectangle())
+                            NavigationLink(destination: HomeView(), isActive:$gotoHome){
+                                Button(action: {
+                                    gotoHome = true
+                                }) {
+                                    Image(systemName: "arrow.backward")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.black)
+                                        .frame(width: 60, height: 60)
+                                        .contentShape(Rectangle())
+                                }
+                                .padding(.leading, 12)
                             }
-                            .padding(.leading, 12)
-                            
                             Spacer()
                         }
                         .padding(.top, 12)
@@ -31,7 +34,7 @@ struct AboutView: View {
                             // Main info card
                             CardView {
                                 VStack(spacing: 12) {
-                                    Text("Kapas Mitra")
+                                    Text("Kapas Kisan")
                                         .font(.system(size: 28, weight: .bold))
                                         .foregroundColor(.black)
                                     
@@ -89,6 +92,7 @@ struct AboutView: View {
             }
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

@@ -22,6 +22,7 @@ struct AddLandView: View {
     @State private var showingDocumentPicker = false
     @State private var selectedImages: [UIImage] = []
     @State private var selectedDocuments: [URL] = []
+    @State private var gotoHome:Bool = false
     
     var body: some View {
         NavigationView {
@@ -38,16 +39,18 @@ struct AddLandView: View {
                     
                     // Header with back button and title
                     HStack {
-                        Button(action: {
-                            // Back action
-                        }) {
-                            Image(systemName: "arrow.backward")
-                                .font(.system(size: 24))
-                                .foregroundColor(.black)
-                                .frame(width: 48, height: 48)
-                                .contentShape(Rectangle())
+                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
+                            Button(action: {
+                                gotoHome = true
+                            }) {
+                                Image(systemName: "arrow.backward")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.black)
+                                    .frame(width: 60, height: 60)
+                                    .contentShape(Rectangle())
+                            }
+                            .padding(.leading, 12)
                         }
-                        .padding(.leading, 16)
                         
                         Text("Add Land")
                             .font(.system(size: 24, weight: .bold))
@@ -238,6 +241,7 @@ struct AddLandView: View {
             .sheet(isPresented: $showingDocumentPicker) {
                 DocumentPicker(selectedDocuments: $selectedDocuments)
             }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

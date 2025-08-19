@@ -54,7 +54,7 @@ struct SelectProfileView: View {
                                     )
                                     
                                     Button(action: {
-                                        // Proceed action
+                                        navigateToHome = true
                                     }) {
                                         Image(systemName: "arrow.forward")
                                             .resizable()
@@ -109,10 +109,8 @@ struct SelectProfileView: View {
                                         .padding(.trailing, 12)
                                     
                                     Button(action: {
-                                        // Clear session
                                         SessionManager.shared.authToken = nil
                                         SessionManager.shared.mobileNumber = nil
-                                        // Trigger navigation
                                         navigateToLogin = true
                                     }) {
                                         Text("Logout")
@@ -155,6 +153,7 @@ struct SelectProfileView: View {
                 .padding(16)
             }
             .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
             .alert(isPresented: $showNoInternetAlert) {
                 Alert(
                     title: Text("No Internet"),
@@ -180,12 +179,14 @@ struct SelectProfileView: View {
                         case .success(let barcodesResult):
                             DispatchQueue.main.async {
                                 if(barcodesResult.count > 1){
+                                    SessionManager.shared.isRegistered = true
                                     self.barcodes = barcodesResult.map { $0.barCode }
                                     if let first = self.barcodes.first {
                                         self.selectedBarcode = first
                                     }
                                 }
                                 else{
+                                    SessionManager.shared.isRegistered = false
                                     self.navigateToHome = true
                                 }
                             }

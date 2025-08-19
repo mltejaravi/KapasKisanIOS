@@ -179,6 +179,7 @@ struct LoginView: View {
                 .padding(.bottom, 16)
             }
             .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
             .alert(isPresented: $showNoInternetAlert) {
                 Alert(
                     title: Text("No Internet"),

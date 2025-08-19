@@ -38,6 +38,7 @@ struct RegistrationView: View {
     @State private var showingDocumentPicker = false
     @State private var selectedImages: [UIImage] = []
     @State private var selectedDocuments: [URL] = []
+    @State private var gotoHome:Bool = false
     
     var body: some View {
         NavigationView {
@@ -54,16 +55,18 @@ struct RegistrationView: View {
                     
                     // Header with back button and title
                     HStack {
-                        Button(action: {
-                            // Back action
-                        }) {
-                            Image(systemName: "arrow.backward")
-                                .font(.system(size: 24))
-                                .foregroundColor(.black)
-                                .frame(width: 48, height: 48)
-                                .contentShape(Rectangle())
+                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
+                            Button(action: {
+                                gotoHome = true
+                            }) {
+                                Image(systemName: "arrow.backward")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.black)
+                                    .frame(width: 60, height: 60)
+                                    .contentShape(Rectangle())
+                            }
+                            .padding(.leading, 12)
                         }
-                        .padding(.leading, 16)
                         
                         Text("Farmer Registration")
                             .font(.system(size: 24, weight: .bold))
@@ -417,6 +420,10 @@ struct RegistrationView: View {
                 }
             }
             .navigationBarHidden(true)
+            .sheet(isPresented: $showingDocumentPicker) {
+                DocumentPicker(selectedDocuments: $selectedDocuments)
+            }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

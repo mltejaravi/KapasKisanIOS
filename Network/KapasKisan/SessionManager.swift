@@ -4,6 +4,7 @@ class SessionManager {
 
     var authToken: String?
     var mobileNumber: String?
+    var isRegistered: Bool = false
     
     func checkSession() -> Bool {
         guard let number = mobileNumber, !number.isEmpty else {
