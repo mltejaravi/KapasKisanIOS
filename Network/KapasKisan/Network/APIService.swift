@@ -102,36 +102,73 @@ class ApiService: NSObject {
         }
     
     // MARK: - Get Barcodes By Mobile Number
-        func getBarcodesByMobileNumber(token: String, mobileNumber: String, completion: @escaping (Result<[BarCode], Error>) -> Void) {
-            guard let url = URL(string: baseURL + "api/BarcodesByMobileNumber/\(mobileNumber)") else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
+    func getBarcodesByMobileNumber(token: String, mobileNumber: String,
+                                   completion: @escaping (Result<[BarCode], Error>) -> Void) {
+        guard let url = URL(string: baseURL + "api/BarcodesByMobileNumber/\(mobileNumber)") else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        session.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
                 return
             }
             
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey : "No Data Received"])))
+                return
+            }
             
-            session.dataTask(with: request) { data, _, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let data = data else {
-                    completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey : "No Data Received"])))
-                    return
-                }
-                
-                do {
-                    let barcodes = try JSONDecoder().decode([BarCode].self, from: data)
-                    completion(.success(barcodes))
-                } catch {
-                    completion(.failure(error))
-                }
-            }.resume()
+            do {
+                let barcodes = try JSONDecoder().decode([BarCode].self, from: data)
+                completion(.success(barcodes))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Get Farmer Details By Barcode
+    func getFarmerDetailsByBarcode(
+        token: String,
+        barCode: String,
+        completion: @escaping (Result<[FarmerRegistrationResponse], Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "api/GetFarmerDetailsByBarcode/\(barCode)") else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
+            return
         }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        session.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey : "No Data Received"])))
+                return
+            }
+            
+            do {
+                let farmers = try JSONDecoder().decode([FarmerRegistrationResponse].self, from: data)
+                completion(.success(farmers))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
 }
+
 
 // MARK: - Allow Self-Signed SSL Certificates (DEV ONLY)
 extension ApiService: URLSessionDelegate {

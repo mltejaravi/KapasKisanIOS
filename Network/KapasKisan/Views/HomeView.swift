@@ -3,6 +3,8 @@ import SwiftUI
 // MARK: - Home View
 struct HomeView: View {
     @State private var navigateToLogin: Bool = false
+    @State private var regStatus: String = ""
+    @State private var regRemarks: String = ""
     
     var body: some View {
         NavigationView {
@@ -24,10 +26,15 @@ struct HomeView: View {
                                     .foregroundColor(.black)
                                     .padding(.bottom, 12)
                                 
-                                Text("Registration Status")
+                                Text(regStatus)
                                     .font(.system(size: 16))
                                     .foregroundColor(.gray)
                                     .padding(.bottom, 16)
+                                
+                                Text(regRemarks)   // bind state variable here
+                                            .font(.system(size: 18, weight: .medium))
+                                            .foregroundColor(.black)
+                                            .padding(.bottom, 16)
                                 
                                 // Menu options
                                 MenuCard(
@@ -157,6 +164,32 @@ struct HomeView: View {
             .navigationBarBackButtonHidden(true) // Hide back button globally
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            if let token = SessionManager.shared.authToken,
+               let barcode = SessionManager.shared.barCode {
+                if(barcode != "" && barcode != "Select BarCode"){
+                    ApiService.shared.getFarmerDetailsByBarcode(token: token, barCode: barcode) { result in
+                        switch result{
+                        case .success(let farmerDetails):
+                            DispatchQueue.main.async {
+                                if let first = farmerDetails.first{
+                                    SessionManager.shared.farmerDetails = first
+                                    regStatus = "Farmer is registered"
+                                    regRemarks = first.regRemarks ?? ""
+                                }
+                            }
+                        case .failure(let error):
+                            print("⚠️ Failed to fetch farmer details: \(error)")
+                        }
+                    }
+                }
+                else{
+                    regStatus = "Farmer is not registered"
+                }
+            } else {
+                print("⚠️ Missing token or barcode")
+            }
+        }
     }
 }
 
