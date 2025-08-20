@@ -425,6 +425,8 @@ struct RegistrationView: View {
             }
             .navigationBarBackButtonHidden(true)
         }
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
     }
 }
 

@@ -234,6 +234,8 @@ struct SlotBookingView: View {
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
         }
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
     }
 }
 

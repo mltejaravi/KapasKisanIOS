@@ -45,6 +45,8 @@ struct SelectProfileView: View {
             }
         }
         .onAppear(perform: onAppearAction)
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
         .background(NavigationLink("", destination: HomeView(), isActive: $navigateToHome).hidden())
         .background(NavigationLink("", destination: LoginView(), isActive: $navigateToLogin).hidden())
     }
@@ -239,7 +241,6 @@ extension SelectProfileView {
                         if barcodesResult.count > 1 {
                             SessionManager.shared.isRegistered = true
                             self.barcodes = barcodesResult.map { $0.barCode }
-                            // ✅ Leave selectedBarcode as "Select BarCode"
                         } else if let onlyBarcode = barcodesResult.first?.barCode {
                             SessionManager.shared.isRegistered = true
                             self.selectedBarcode = onlyBarcode

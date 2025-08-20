@@ -190,6 +190,8 @@ struct HomeView: View {
                 print("⚠️ Missing token or barcode")
             }
         }
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
