@@ -10,19 +10,39 @@ struct AddLandView: View {
     @State private var uniqueId: String = ""
     @State private var totalLand: String = ""
     @State private var cottonLand: String = ""
+    @State private var selectedMeasureType = "Acres"
+    
+    @State private var isTraditional = false
+    @State private var traditionalLand = ""
+        
+    @State private var isHDPS = false
+    @State private var hdpsLand = ""
+        
+    @State private var isDesiCotton = false
+    @State private var desiCottonLand = ""
+        
+    @State private var isCloserSpacing = false
+    @State private var closerSpacingLand = ""
     
     // Sample data for pickers
-    let states = ["State 1", "State 2", "State 3"]
-    let districts = ["District 1", "District 2", "District 3"]
-    let mandals = ["Mandal 1", "Mandal 2", "Mandal 3"]
-    let villages = ["Village 1", "Village 2", "Village 3"]
-    let markets = ["Market 1", "Market 2", "Market 3"]
+    private let states = ["State 1", "State 2", "State 3"]
+    private let districts = ["District 1", "District 2", "District 3"]
+    private let mandals = ["Mandal 1", "Mandal 2", "Mandal 3"]
+    private let villages = ["Village 1", "Village 2", "Village 3"]
+    private let markets = ["Market 1", "Market 2", "Market 3"]
     
     @State private var showingImagePicker = false
     @State private var showingDocumentPicker = false
     @State private var selectedImages: [UIImage] = []
     @State private var selectedDocuments: [URL] = []
     @State private var gotoHome:Bool = false
+    private let measureTypes = ["Acres", "Hectares"]
+    
+    @State private var uniqueIdVisible = true;
+    @State private var uniqueId1Visible = false;
+    @State private var uniqueId2Visible = false;
+    @State private var uniqueId3Visible = false;
+    @State private var uniqueId4Visible = false;
     
     var body: some View {
         NavigationView {
@@ -170,9 +190,82 @@ struct AddLandView: View {
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
                                     
+                                    Text("Select Measure Type")
+                                        .frame(maxWidth:.infinity, alignment:.leading)
+                                        .font(.system(size: 14))
+                                    
+                                    Picker("Select Measure Type", selection: $selectedMeasureType) {
+                                        ForEach(measureTypes, id: \.self) { type in
+                                            Text(type).tag(type)
+                                        }
+                                    }
+                                    .pickerStyle(MenuPickerStyle())
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 48)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                                    
+                                    Text("Select Crop Type")
+                                        .font(.headline)
+                                        .foregroundColor(.black)
+                                    
+                                    // Traditional Crop
+                                    HStack {
+                                        Toggle("Traditional Crop", isOn: $isTraditional)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $traditionalLand)
+                                            .disabled(!isTraditional)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
+                                    // HDPS
+                                    HStack {
+                                        Toggle("HDPS", isOn: $isHDPS)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $hdpsLand)
+                                            .disabled(!isHDPS)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
+                                    // Desi Cotton
+                                    HStack {
+                                        Toggle("Desi Cotton", isOn: $isDesiCotton)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $desiCottonLand)
+                                            .disabled(!isDesiCotton)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
+                                    // Closer Spacing
+                                    HStack {
+                                        Toggle("Closer Spacing", isOn: $isCloserSpacing)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $closerSpacingLand)
+                                            .disabled(!isCloserSpacing)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
                                     // Unique ID
-                                    TextField("Enter unique ID (ex: Pattadar Pass Book Number)", text: $uniqueId)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    if(uniqueIdVisible){
+                                        TextField("Enter unique ID (ex: Pattadar Pass Book Number)", text: $uniqueId)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
                                     
                                     // Total Land
                                     TextField("Total Land", text: $totalLand)

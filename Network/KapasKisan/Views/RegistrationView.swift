@@ -21,17 +21,31 @@ struct RegistrationView: View {
     @State private var passbookNumber: String = ""
     @State private var totalLand: String = ""
     @State private var cottonLand: String = ""
+    @State private var selectedMeasureType = "Acres"
+    
+    @State private var isTraditional = false
+    @State private var traditionalLand = ""
+        
+    @State private var isHDPS = false
+    @State private var hdpsLand = ""
+        
+    @State private var isDesiCotton = false
+    @State private var desiCottonLand = ""
+        
+    @State private var isCloserSpacing = false
+    @State private var closerSpacingLand = ""
     
     // Sample data for pickers
-    let titles = ["Mr.", "Mrs.", "Ms.", "Dr."]
-    let genders = ["Male", "Female", "Other"]
-    let categories = ["General", "OBC", "SC", "ST"]
-    let states = ["State 1", "State 2", "State 3"]
-    let districts = ["District 1", "District 2", "District 3"]
-    let mandals = ["Mandal 1", "Mandal 2", "Mandal 3"]
-    let villages = ["Village 1", "Village 2", "Village 3"]
-    let markets = ["Market 1", "Market 2", "Market 3"]
-    let farmerTypes = ["Type 1", "Type 2", "Type 3"]
+    @State private var titles: [Title] = []
+    private let genders = ["Male", "Female", "Other"]
+    private let categories = ["General", "OBC", "SC", "ST"]
+    private let states = ["State 1", "State 2", "State 3"]
+    private let districts = ["District 1", "District 2", "District 3"]
+    private let mandals = ["Mandal 1", "Mandal 2", "Mandal 3"]
+    private let villages = ["Village 1", "Village 2", "Village 3"]
+    private let markets = ["Market 1", "Market 2", "Market 3"]
+    private let farmerTypes = ["Type 1", "Type 2", "Type 3"]
+    private let measureTypes = ["Acres", "Hectares"]
     
     @State private var showingDatePicker = false
     @State private var showingImagePicker = false
@@ -244,11 +258,11 @@ struct RegistrationView: View {
                                     )
                                     
                                     // Mandal selection
-                                    Text("Select Mandal")
+                                    Text("Select Mandal/Block")
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Mandal", selection: $selectedMandal) {
+                                    Picker("Select Mandal/Block", selection: $selectedMandal) {
                                         ForEach(mandals, id: \.self) { mandal in
                                             Text(mandal).tag(mandal)
                                         }
@@ -322,6 +336,77 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    
+                                    Text("Select Measure Type")
+                                        .frame(maxWidth:.infinity, alignment:.leading)
+                                        .font(.system(size: 14))
+                                    
+                                    Picker("Select Measure Type", selection: $selectedMeasureType) {
+                                        ForEach(measureTypes, id: \.self) { type in
+                                            Text(type).tag(type)
+                                        }
+                                    }
+                                    .pickerStyle(MenuPickerStyle())
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 48)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                                    
+                                    Text("Select Crop Type")
+                                        .font(.headline)
+                                        .foregroundColor(.black)
+                                    
+                                    // Traditional Crop
+                                    HStack {
+                                        Toggle("Traditional Crop", isOn: $isTraditional)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $traditionalLand)
+                                            .disabled(!isTraditional)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
+                                    // HDPS
+                                    HStack {
+                                        Toggle("HDPS", isOn: $isHDPS)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $hdpsLand)
+                                            .disabled(!isHDPS)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
+                                    // Desi Cotton
+                                    HStack {
+                                        Toggle("Desi Cotton", isOn: $isDesiCotton)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $desiCottonLand)
+                                            .disabled(!isDesiCotton)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
+                                    
+                                    // Closer Spacing
+                                    HStack {
+                                        Toggle("Closer Spacing", isOn: $isCloserSpacing)
+                                            .toggleStyle(ChkCheckboxToggleStyle())
+                                        
+                                        TextField("Crop Land (Acres)", text: $closerSpacingLand)
+                                            .disabled(!isCloserSpacing)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.decimalPad)
+                                            .frame(height: 48)
+                                    }
                                     
                                     // Passbook Number
                                     TextField("Passbook No / Khatha No", text: $passbookNumber)
@@ -425,10 +510,31 @@ struct RegistrationView: View {
             }
             .navigationBarBackButtonHidden(true)
         }
+        .onAppear {
+            loadTitles()
+            if(SessionManager.shared.barCode != ""){
+                
+            }
+        }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
+    
+    private func loadTitles() {
+        ApiService.shared.getSalutations(token: SessionManager.shared.authToken) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let list):
+                    titles = list
+                case .failure(let error):
+                    print("Failed to load titles: \(error)")
+                }
+            }
+        }
+    }
 }
+
+
 
 // Helper view for image picker
 struct ImagePicker: UIViewControllerRepresentable {
