@@ -22,21 +22,17 @@ struct RegistrationView: View {
     @State private var totalLand: String = ""
     @State private var cottonLand: String = ""
     @State private var selectedMeasureType = "Acres"
-    
     @State private var isTraditional = false
     @State private var traditionalLand = ""
-        
     @State private var isHDPS = false
     @State private var hdpsLand = ""
-        
     @State private var isDesiCotton = false
     @State private var desiCottonLand = ""
-        
     @State private var isCloserSpacing = false
     @State private var closerSpacingLand = ""
     
     // Sample data for pickers
-    @State private var titles: [Title] = []
+    private let titles = ["Mr.", "Mrs.", "Ms.", "Dr."]
     private let genders = ["Male", "Female", "Other"]
     private let categories = ["General", "OBC", "SC", "ST"]
     private let states = ["State 1", "State 2", "State 3"]
@@ -511,7 +507,6 @@ struct RegistrationView: View {
             .navigationBarBackButtonHidden(true)
         }
         .onAppear {
-            loadTitles()
             if(SessionManager.shared.barCode != ""){
                 
             }
@@ -519,22 +514,7 @@ struct RegistrationView: View {
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
-    
-    private func loadTitles() {
-        ApiService.shared.getSalutations(token: SessionManager.shared.authToken) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let list):
-                    titles = list
-                case .failure(let error):
-                    print("Failed to load titles: \(error)")
-                }
-            }
-        }
-    }
 }
-
-
 
 // Helper view for image picker
 struct ImagePicker: UIViewControllerRepresentable {
