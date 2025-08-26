@@ -283,6 +283,74 @@ class ApiService: NSObject {
     func getFarmerTypes(token: String, completion: @escaping (Result<[Title], Error>) -> Void){
         getTitles(endpoint: "api/FarmerTypes", token: token, completion: completion)
     }
+    
+    // MARK: - Register Farmer
+    func registerFarmer(
+        token: String,
+        request: FarmerRegistrationRequest,
+        completion: @escaping (Result<[RegistrationResponse], Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "register") else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+            
+            // For debugging - print the request JSON
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("Request JSON: \(jsonString)")
+            }
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        session.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // Check HTTP status
+            if let httpResponse = response as? HTTPURLResponse {
+                print("HTTP Status Code: \(httpResponse.statusCode)")
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey: "No Data Received"])))
+                return
+            }
+            
+            // For debugging - get the response JSON string
+            let responseJsonString = String(data: data, encoding: .utf8) ?? "No JSON String"
+            print("Response JSON: \(responseJsonString)")
+            
+            do {
+                let decodedResponse = try JSONDecoder().decode([RegistrationResponse].self, from: data)
+                completion(.success(decodedResponse))
+            } catch {
+                // Create error with response JSON string included
+                let errorWithResponse = NSError(
+                    domain: "",
+                    code: -3,
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "Failed to decode response: \(error.localizedDescription)",
+                        "ResponseJSON": responseJsonString,
+                        "UnderlyingError": error
+                    ]
+                )
+                completion(.failure(errorWithResponse))
+            }
+        }.resume()
+    }
 }
 
 // MARK: - Allow Self-Signed SSL Certificates (DEV ONLY)

@@ -60,7 +60,7 @@ struct RegistrationView: View {
     @State private var showingDocumentPicker = false
     @State private var selectedImages: [UIImage] = []
     @State private var selectedDocuments: [URL] = []
-    @State private var gotoHome:Bool = false
+    @State private var gotoHome = false
     
     @State private var uniqueNames: UniqueNames?
     @State private var text1: String = ""
@@ -73,6 +73,7 @@ struct RegistrationView: View {
     
     @State private var showValidationAlert = false
     @State private var validationMessage = ""
+    @State private var validationTitle = ""
     
     var body: some View {
         NavigationView {
@@ -80,8 +81,9 @@ struct RegistrationView: View {
                 // Background color
                 Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all)
                 
+                // Elements/Fields
                 VStack(spacing: 0) {
-                    // Status bar border (not exactly the same as Android, but similar)
+                    // Status bar border
                     Rectangle()
                         .fill(Color.blue)
                         .frame(height: 2)
@@ -89,18 +91,16 @@ struct RegistrationView: View {
                     
                     // Header with back button and title
                     HStack {
-                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
-                            Button(action: {
-                                gotoHome = true
-                            }) {
-                                Image(systemName: "arrow.backward")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.black)
-                                    .frame(width: 60, height: 60)
-                                    .contentShape(Rectangle())
-                            }
-                            .padding(.leading, 12)
+                        Button(action: {
+                            gotoHome = true
+                        }) {
+                            Image(systemName: "arrow.backward")
+                                .font(.system(size: 24))
+                                .foregroundColor(.black)
+                                .frame(width: 60, height: 60)
+                                .contentShape(Rectangle())
                         }
+                        .padding(.leading, 12)
                         
                         Text("Farmer Registration")
                             .font(.system(size: 24, weight: .bold))
@@ -111,7 +111,6 @@ struct RegistrationView: View {
                     
                     // Scrollable form
                     ScrollView {
-                        
                         VStack(spacing: 16) {
                             // Form container
                             VStack(spacing: 16) {
@@ -223,7 +222,6 @@ struct RegistrationView: View {
                                     .keyboardType(.numberPad)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .onChange(of: aadharNumber) { newValue in
-                                        // Allow only numbers and max 12 digits
                                         let filtered = newValue.filter { $0.isNumber }
                                         if filtered.count > 12 {
                                             aadharNumber = String(filtered.prefix(12))
@@ -238,7 +236,6 @@ struct RegistrationView: View {
                                     .disabled(true)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .onChange(of: mobileNumber) { newValue in
-                                        // Allow only numbers and max 10 digits
                                         let filtered = newValue.filter { $0.isNumber }
                                         if filtered.count > 10 {
                                             mobileNumber = String(filtered.prefix(10))
@@ -447,8 +444,6 @@ struct RegistrationView: View {
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
                                     
-                                    
-                                    
                                     // Passbook Number
                                     if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
                                        (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
@@ -630,7 +625,7 @@ struct RegistrationView: View {
                     }
                 }
                 
-                // Toast overlay - Should be at this level in ZStack
+                // Toast overlay
                 if showToast {
                     VStack {
                         Spacer()
@@ -653,17 +648,13 @@ struct RegistrationView: View {
                     .zIndex(1000)
                 }
                 
-                
                 // Submit button (fixed at bottom)
                 VStack {
                     Spacer()
                     Button(action: {
-                        // Submit registration
                         if validateForm() {
-                            // ✅ Proceed with API call / submission
-                            print("Form valid, submit data here")
+                            submitRegistration()
                         } else {
-                            // ❌ Show alert
                             showValidationAlert = true
                         }
                     }) {
@@ -679,18 +670,36 @@ struct RegistrationView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                     .alert(isPresented: $showValidationAlert) {
-                        Alert(title: Text("Validation Error"), message: Text(validationMessage), dismissButton: .default(Text("OK")))
+                        if validationTitle == "Registration Successful!" {
+                            return Alert(
+                                title: Text(validationTitle),
+                                message: Text(validationMessage),
+                                dismissButton: .default(Text("OK")) {
+                                    // This triggers navigation
+                                    gotoHome = true
+                                }
+                            )
+                        } else {
+                            return Alert(
+                                title: Text(validationTitle),
+                                message: Text(validationMessage),
+                                dismissButton: .default(Text("OK"))
+                            )
+                        }
                     }
                 }
             }
-            .navigationBarHidden(true)
             .sheet(isPresented: $showingDocumentPicker) {
                 DocumentPicker(selectedDocuments: $selectedDocuments)
             }
-            .navigationBarBackButtonHidden(true)
+            // NavigationLink at the root level of ZStack
+            .background(
+                NavigationLink(destination: HomeView(), isActive: $gotoHome) {
+                    EmptyView()
+                }
+            )
         }
         .onAppear {
-            // Loading initials
             mobileNumber = SessionManager.shared.mobileNumber ?? ""
             
             loadTitles()
@@ -699,421 +708,515 @@ struct RegistrationView: View {
             loadStates()
             loadFarmerTypes()
             
-            if(SessionManager.shared.barCode != ""){
-                
+            if SessionManager.shared.barCode != "" {
+                // Handle barcode if needed
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
     }
     
     // MARK: - Fetching Unique Names
-    private func loadUniqueNames() {
-        if let token = SessionManager.shared.authToken,
-           let stateId = selectedState?.id {
-            
-            ApiService.shared.getUniqueNames(token: token, stateId: stateId) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let list):
-                        if let first = list.first {
-                            self.uniqueNames = first
+       private func loadUniqueNames() {
+           if let token = SessionManager.shared.authToken,
+              let stateId = selectedState?.id {
+               
+               ApiService.shared.getUniqueNames(token: token, stateId: stateId) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let list):
+                           if let first = list.first {
+                               self.uniqueNames = first
+                           } else {
+                               // No data → reset uniqueNames
+                               self.uniqueNames = UniqueNames(
+                                   uniQ_ID_1_NAMING: "",
+                                   uniQ_ID_2_NAMING: "",
+                                   uniQ_ID_3_NAMING: "",
+                                   uniQ_ID_4_NAMING: ""
+                               )
+                           }
+                           
+                           // Always reset stored text values
+                           self.text1 = ""
+                           self.text2 = ""
+                           self.text3 = ""
+                           self.text4 = ""
+                           
+                       case .failure(let error):
+                           print("Error fetching unique names: \(error)")
+                           
+                           // Reset uniqueNames on error also
+                           self.uniqueNames = UniqueNames(
+                               uniQ_ID_1_NAMING: "",
+                               uniQ_ID_2_NAMING: "",
+                               uniQ_ID_3_NAMING: "",
+                               uniQ_ID_4_NAMING: ""
+                           )
+                           
+                           self.text1 = ""
+                           self.text2 = ""
+                           self.text3 = ""
+                           self.text4 = ""
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - FarmerTypes
+       private func loadFarmerTypes(){
+           if let token = SessionManager.shared.authToken{
+               ApiService.shared.getFarmerTypes(token: token) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.farmerTypes = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedFarmerType = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - States
+       private func loadStates() {
+           if let token = SessionManager.shared.authToken{
+               ApiService.shared.getStates(token: token) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.states = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedState = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Districts
+       private func loadDistricts(){
+           if let token = SessionManager.shared.authToken,
+              let stateId = selectedState?.id {
+               ApiService.shared.getDistricts(token: token, stateId: stateId ) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.districts = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedDistrict = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Mandals
+       private func loadMandals(){
+           if let token = SessionManager.shared.authToken,
+              let districtId = selectedDistrict?.id {
+               ApiService.shared.getMandals(token: token, districtId: districtId ) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.mandals = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedMandal = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Villages
+       private func loadVillages(){
+           if let token = SessionManager.shared.authToken,
+              let mandalId = selectedMandal?.id {
+               ApiService.shared.getVillages(token: token, mandalId: mandalId ) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.villages = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedVillage = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Markets
+       private func loadMarkets(){
+           if let token = SessionManager.shared.authToken,
+              let districtId = selectedDistrict?.id {
+               ApiService.shared.getDistrictMarkets(token: token,
+                                                   districtId: districtId ) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.markets = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedMarket = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Category/Caste
+       private func loadCategories(){
+           if let token = SessionManager.shared.authToken{
+               ApiService.shared.getCastes(token: token) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.categories = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedCategory = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Salutations
+       private func loadTitles() {
+           if let token = SessionManager.shared.authToken{
+               ApiService.shared.getSalutations(token: token) { result in
+                   DispatchQueue.main.async {
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.titles = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedTitle = first  // Default first
+                           }
+                       case .failure(let error):
+                           print("Error fetching titles: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Genders
+       private func loadGenders(){
+           if let token =  SessionManager.shared.authToken{
+               ApiService.shared.getGenders(token: token){
+                   result in DispatchQueue.main.async{
+                       switch result {
+                       case .success(let titlesResponse):
+                           self.genders = titlesResponse
+                           if let first = titlesResponse.first {
+                               self.selectedGender = first
+                           }
+                       case .failure(let error):
+                           print("Error fetching genders: \(error)")
+                       }
+                   }
+               }
+           }
+       }
+       
+       // MARK: - Validation
+       private func validateForm() -> Bool {
+           validationTitle = "Validation Error"
+           if selectedTitle == nil || selectedTitle?.id == 0{
+               validationMessage = "Please select a Title"
+               return false
+           }
+           if farmerName.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter Farmer Name"
+               return false
+           }
+           if fatherName.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter Father's Name"
+               return false
+           }
+           if selectedGender == nil || selectedGender?.id == 0 {
+               validationMessage = "Please select Gender"
+               return false
+           }
+           // ✅ DOB validation
+           let calendar = Calendar.current
+           let today = Date()
+
+           // Ensure DOB is not default and age >= 1 year
+           if dob == Date() {
+               validationMessage = "Please select Date of Birth"
+               return false
+           }
+
+           if let age = calendar.dateComponents([.year], from: dob, to: today).year {
+               if age < 1 {
+                   validationMessage = "Farmer must be at least 1 year old"
+                   return false
+               }
+           }
+           
+           if(selectedCategory == nil || selectedCategory?.id == 0){
+               validationMessage = "Please select Caste"
+               return false
+           }
+           
+           if aadharNumber.count != 12 {
+               validationMessage = "Aadhar number must be 12 digits"
+               return false
+           }
+           if mobileNumber.count != 10 {
+               validationMessage = "Mobile number must be 10 digits"
+               return false
+           }
+           if address.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter Address"
+               return false
+           }
+           if selectedState == nil || selectedState?.id == 0 {
+               validationMessage = "Please select State"
+               return false
+           }
+           if selectedDistrict == nil || selectedDistrict?.id == 0 {
+               validationMessage = "Please select District"
+               return false
+           }
+           if selectedMandal == nil || selectedMandal?.id == 0 {
+               validationMessage = "Please select Mandal"
+               return false
+           }
+           if selectedVillage == nil || selectedVillage?.id == 0 {
+               validationMessage = "Please select Village"
+               return false
+           }
+           if selectedMarket == nil || selectedMarket?.id == 0 {
+               validationMessage = "Please select Market"
+               return false
+           }
+           if selectedFarmerType == nil {
+               validationMessage = "Please select Farmer Type"
+               return false
+           }
+
+           // ✅ Land values
+           if totalLand.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter Total Land"
+               return false
+           }
+           if cottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter Cotton Land"
+               return false
+           }
+
+           // ✅ Unique Names validation
+           if let uniqueNames = uniqueNames {
+               var hasUniqueNames = false
+
+               if let name = uniqueNames.uniQ_ID_1_NAMING, !name.isEmpty {
+                   hasUniqueNames = true
+                   if text1.trimmingCharacters(in: .whitespaces).isEmpty {
+                       validationMessage = "Please enter \(name)"
+                       return false
+                   }
+               }
+
+               if let name = uniqueNames.uniQ_ID_2_NAMING, !name.isEmpty {
+                   hasUniqueNames = true
+                   if text2.trimmingCharacters(in: .whitespaces).isEmpty {
+                       validationMessage = "Please enter \(name)"
+                       return false
+                   }
+               }
+
+               if let name = uniqueNames.uniQ_ID_3_NAMING, !name.isEmpty {
+                   hasUniqueNames = true
+                   if text3.trimmingCharacters(in: .whitespaces).isEmpty {
+                       validationMessage = "Please enter \(name)"
+                       return false
+                   }
+               }
+
+               if let name = uniqueNames.uniQ_ID_4_NAMING, !name.isEmpty {
+                   hasUniqueNames = true
+                   if text4.trimmingCharacters(in: .whitespaces).isEmpty {
+                       validationMessage = "Please enter \(name)"
+                       return false
+                   }
+               }
+
+               // ✅ Else case: if no unique names are present → validate passbookNumber
+               if !hasUniqueNames {
+                   if passbookNumber.trimmingCharacters(in: .whitespaces).isEmpty {
+                       validationMessage = "Please enter Passbook No / Khatha No"
+                       return false
+                   }
+               }
+           }
+
+           // ✅ Crop Types validation
+           if !(isTraditional || isHDPS || isDesiCotton || isCloserSpacing) {
+               validationMessage = "Please select at least one Crop Type"
+               return false
+           }
+           if isTraditional && traditionalLand.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter land for Traditional Crop"
+               return false
+           }
+           if isHDPS && hdpsLand.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter land for HDPS"
+               return false
+           }
+           if isDesiCotton && desiCottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter land for Desi Cotton"
+               return false
+           }
+           if isCloserSpacing && closerSpacingLand.trimmingCharacters(in: .whitespaces).isEmpty {
+               validationMessage = "Please enter land for Closer Spacing"
+               return false
+           }
+           // ✅ Cotton Land total check
+           let cottonValue = Double(cottonLand) ?? 0
+           let traditionalValue = isTraditional ? (Double(traditionalLand) ?? 0) : 0
+           let hdpsValue = isHDPS ? (Double(hdpsLand) ?? 0) : 0
+           let desiCottonValue = isDesiCotton ? (Double(desiCottonLand) ?? 0) : 0
+           let closerSpacingValue = isCloserSpacing ? (Double(closerSpacingLand) ?? 0) : 0
+
+           let totalCropValue = traditionalValue + hdpsValue + desiCottonValue + closerSpacingValue
+
+           if cottonValue != totalCropValue {
+               validationMessage = "Cotton Land must equal the sum of selected crop lands (\(totalCropValue))"
+               return false
+           }
+           
+           // ✅ Images validation
+           if selectedImages.count != 2 {
+               validationMessage = "Please upload Farmer photo and Aadhar card photo"
+               return false
+           }
+           
+           // ✅ Documents validation
+           if selectedDocuments.isEmpty {
+               validationMessage = "Please upload at least 1 document"
+               return false
+           }
+
+           return true
+       }
+    
+    private func submitRegistration() {
+        let request = FarmerRegistrationRequest(
+            Flag: 1,
+            Id: 0,
+            Barcode: "0",
+            FarmerType: Int64(selectedFarmerType?.id ?? 0),
+            SalutationID: selectedTitle?.id ?? 0,
+            GenderID: selectedGender?.id ?? 0,
+            FarmerFullname: farmerName,
+            Fname: fatherName,
+            PassBookNo: passbookNumber.isEmpty ? nil : passbookNumber,
+            Fk_District: Int64(selectedDistrict?.id ?? 0),
+            Fk_Mandal: Int64(selectedMandal?.id ?? 0),
+            Fk_Village: Int64(selectedVillage?.id ?? 0),
+            AadharNo: aadharNumber,
+            MobileNo: mobileNumber,
+            TotalLand: Double(totalLand) ?? 0,
+            NoOfAcr: Double(cottonLand) ?? 0,
+            MarketId: Int64(selectedMarket?.id ?? 0),
+            Category: selectedCategory?.id ?? 0,
+            Address: address,
+            DOB: formatDate(dob),
+            Uniq_1: text1.isEmpty ? nil : text1,
+            Uniq_2: text2.isEmpty ? nil : text2,
+            Uniq_3: text3.isEmpty ? nil : text3,
+            Uniq_4: text4.isEmpty ? nil : text4,
+            tc: isTraditional ? Double(traditionalLand) : nil,
+            hd: isHDPS ? Double(hdpsLand) : nil,
+            dc: isDesiCotton ? Double(desiCottonLand) : nil,
+            cs: isCloserSpacing ? Double(closerSpacingLand) : nil,
+            MeasureType: selectedMeasureType == "Acres" ? 0 : 1
+        )
+        
+        guard let token = SessionManager.shared.authToken else {
+            showToast = true
+            toastMessage = "Authentication token missing"
+            return
+        }
+        
+        ApiService.shared.registerFarmer(token: token, request: request) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    if let firstResponse = response.first {
+                        showValidationAlert = true
+                        validationTitle = "Registration Successful!"
+                        validationMessage = "Registration successful with BarCode: \(firstResponse.Barcode ?? "N/A")!"
+                        // DON'T set gotoHome here - let the alert handle it
+                    } else {
+                        showToast = true
+                        toastMessage = "Registration failed: Empty response"
+                    }
+                    
+                case .failure(let error):
+                    showToast = true
+                    let nsError = error as NSError
+                    
+                    if let responseJson = nsError.userInfo["ResponseJSON"] as? String {
+                        if let jsonData = responseJson.data(using: .utf8),
+                           let jsonObject = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+                            
+                            if let errorMessage = jsonObject["message"] as? String {
+                                toastMessage = "Registration failed: \(errorMessage)"
+                            } else if let errorMessage = jsonObject["error"] as? String {
+                                toastMessage = "Registration failed: \(errorMessage)"
+                            } else if let errors = jsonObject["errors"] as? [String: Any] {
+                                if let firstError = errors.values.first as? [String],
+                                   let firstErrorMessage = firstError.first {
+                                    toastMessage = "Registration failed: \(firstErrorMessage)"
+                                } else if let firstError = errors.values.first as? String {
+                                    toastMessage = "Registration failed: \(firstError)"
+                                } else {
+                                    toastMessage = "Registration failed: \(responseJson)"
+                                }
+                            } else {
+                                toastMessage = "Registration failed: \(responseJson)"
+                            }
                         } else {
-                            // No data → reset uniqueNames
-                            self.uniqueNames = UniqueNames(
-                                uniQ_ID_1_NAMING: "",
-                                uniQ_ID_2_NAMING: "",
-                                uniQ_ID_3_NAMING: "",
-                                uniQ_ID_4_NAMING: ""
-                            )
+                            toastMessage = "Registration failed: \(responseJson)"
                         }
-                        
-                        // Always reset stored text values
-                        self.text1 = ""
-                        self.text2 = ""
-                        self.text3 = ""
-                        self.text4 = ""
-                        
-                    case .failure(let error):
-                        print("Error fetching unique names: \(error)")
-                        
-                        // Reset uniqueNames on error also
-                        self.uniqueNames = UniqueNames(
-                            uniQ_ID_1_NAMING: "",
-                            uniQ_ID_2_NAMING: "",
-                            uniQ_ID_3_NAMING: "",
-                            uniQ_ID_4_NAMING: ""
-                        )
-                        
-                        self.text1 = ""
-                        self.text2 = ""
-                        self.text3 = ""
-                        self.text4 = ""
+                    } else {
+                        toastMessage = "Registration failed: \(error.localizedDescription)"
                     }
                 }
             }
         }
     }
     
-    // MARK: - FarmerTypes
-    private func loadFarmerTypes(){
-        if let token = SessionManager.shared.authToken{
-            ApiService.shared.getFarmerTypes(token: token) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.farmerTypes = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedFarmerType = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - States
-    private func loadStates() {
-        if let token = SessionManager.shared.authToken{
-            ApiService.shared.getStates(token: token) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.states = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedState = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Districts
-    private func loadDistricts(){
-        if let token = SessionManager.shared.authToken,
-           let stateId = selectedState?.id {
-            ApiService.shared.getDistricts(token: token, stateId: stateId ) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.districts = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedDistrict = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Mandals
-    private func loadMandals(){
-        if let token = SessionManager.shared.authToken,
-           let districtId = selectedDistrict?.id {
-            ApiService.shared.getMandals(token: token, districtId: districtId ) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.mandals = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedMandal = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Villages
-    private func loadVillages(){
-        if let token = SessionManager.shared.authToken,
-           let mandalId = selectedMandal?.id {
-            ApiService.shared.getVillages(token: token, mandalId: mandalId ) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.villages = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedVillage = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Markets
-    private func loadMarkets(){
-        if let token = SessionManager.shared.authToken,
-           let districtId = selectedDistrict?.id {
-            ApiService.shared.getDistrictMarkets(token: token,
-                                                districtId: districtId ) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.markets = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedMarket = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Category/Caste
-    private func loadCategories(){
-        if let token = SessionManager.shared.authToken{
-            ApiService.shared.getCastes(token: token) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.categories = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedCategory = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Salutations
-    private func loadTitles() {
-        if let token = SessionManager.shared.authToken{
-            ApiService.shared.getSalutations(token: token) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.titles = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedTitle = first  // Default first
-                        }
-                    case .failure(let error):
-                        print("Error fetching titles: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Genders
-    private func loadGenders(){
-        if let token =  SessionManager.shared.authToken{
-            ApiService.shared.getGenders(token: token){
-                result in DispatchQueue.main.async{
-                    switch result {
-                    case .success(let titlesResponse):
-                        self.genders = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedGender = first  
-                        }
-                    case .failure(let error):
-                        print("Error fetching genders: \(error)")
-                    }
-                }
-            }
-        }
-    }
-    
-    // MARK: - Validation
-    private func validateForm() -> Bool {
-        if selectedTitle == nil || selectedTitle?.id == 0{
-            validationMessage = "Please select a Title"
-            return false
-        }
-        if farmerName.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter Farmer Name"
-            return false
-        }
-        if fatherName.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter Father's Name"
-            return false
-        }
-        if selectedGender == nil || selectedGender?.id == 0 {
-            validationMessage = "Please select Gender"
-            return false
-        }
-        // ✅ DOB validation
-        let calendar = Calendar.current
-        let today = Date()
-
-        // Ensure DOB is not default and age >= 1 year
-        if dob == Date() {
-            validationMessage = "Please select Date of Birth"
-            return false
-        }
-
-        if let age = calendar.dateComponents([.year], from: dob, to: today).year {
-            if age < 1 {
-                validationMessage = "Farmer must be at least 1 year old"
-                return false
-            }
-        }
-        
-        if(selectedCategory == nil || selectedCategory?.id == 0){
-            validationMessage = "Please select Caste"
-            return false
-        }
-        
-        if aadharNumber.count != 12 {
-            validationMessage = "Aadhar number must be 12 digits"
-            return false
-        }
-        if mobileNumber.count != 10 {
-            validationMessage = "Mobile number must be 10 digits"
-            return false
-        }
-        if address.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter Address"
-            return false
-        }
-        if selectedState == nil || selectedState?.id == 0 {
-            validationMessage = "Please select State"
-            return false
-        }
-        if selectedDistrict == nil || selectedDistrict?.id == 0 {
-            validationMessage = "Please select District"
-            return false
-        }
-        if selectedMandal == nil || selectedMandal?.id == 0 {
-            validationMessage = "Please select Mandal"
-            return false
-        }
-        if selectedVillage == nil || selectedVillage?.id == 0 {
-            validationMessage = "Please select Village"
-            return false
-        }
-        if selectedMarket == nil || selectedMarket?.id == 0 {
-            validationMessage = "Please select Market"
-            return false
-        }
-        if selectedFarmerType == nil {
-            validationMessage = "Please select Farmer Type"
-            return false
-        }
-
-        // ✅ Land values
-        if totalLand.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter Total Land"
-            return false
-        }
-        if cottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter Cotton Land"
-            return false
-        }
-
-        // ✅ Unique Names validation
-        if let uniqueNames = uniqueNames {
-            var hasUniqueNames = false
-
-            if let name = uniqueNames.uniQ_ID_1_NAMING, !name.isEmpty {
-                hasUniqueNames = true
-                if text1.trimmingCharacters(in: .whitespaces).isEmpty {
-                    validationMessage = "Please enter \(name)"
-                    return false
-                }
-            }
-
-            if let name = uniqueNames.uniQ_ID_2_NAMING, !name.isEmpty {
-                hasUniqueNames = true
-                if text2.trimmingCharacters(in: .whitespaces).isEmpty {
-                    validationMessage = "Please enter \(name)"
-                    return false
-                }
-            }
-
-            if let name = uniqueNames.uniQ_ID_3_NAMING, !name.isEmpty {
-                hasUniqueNames = true
-                if text3.trimmingCharacters(in: .whitespaces).isEmpty {
-                    validationMessage = "Please enter \(name)"
-                    return false
-                }
-            }
-
-            if let name = uniqueNames.uniQ_ID_4_NAMING, !name.isEmpty {
-                hasUniqueNames = true
-                if text4.trimmingCharacters(in: .whitespaces).isEmpty {
-                    validationMessage = "Please enter \(name)"
-                    return false
-                }
-            }
-
-            // ✅ Else case: if no unique names are present → validate passbookNumber
-            if !hasUniqueNames {
-                if passbookNumber.trimmingCharacters(in: .whitespaces).isEmpty {
-                    validationMessage = "Please enter Passbook No / Khatha No"
-                    return false
-                }
-            }
-        }
-
-        // ✅ Crop Types validation
-        if !(isTraditional || isHDPS || isDesiCotton || isCloserSpacing) {
-            validationMessage = "Please select at least one Crop Type"
-            return false
-        }
-        if isTraditional && traditionalLand.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter land for Traditional Crop"
-            return false
-        }
-        if isHDPS && hdpsLand.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter land for HDPS"
-            return false
-        }
-        if isDesiCotton && desiCottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter land for Desi Cotton"
-            return false
-        }
-        if isCloserSpacing && closerSpacingLand.trimmingCharacters(in: .whitespaces).isEmpty {
-            validationMessage = "Please enter land for Closer Spacing"
-            return false
-        }
-        // ✅ Cotton Land total check
-        let cottonValue = Double(cottonLand) ?? 0
-        let traditionalValue = isTraditional ? (Double(traditionalLand) ?? 0) : 0
-        let hdpsValue = isHDPS ? (Double(hdpsLand) ?? 0) : 0
-        let desiCottonValue = isDesiCotton ? (Double(desiCottonLand) ?? 0) : 0
-        let closerSpacingValue = isCloserSpacing ? (Double(closerSpacingLand) ?? 0) : 0
-
-        let totalCropValue = traditionalValue + hdpsValue + desiCottonValue + closerSpacingValue
-
-        if cottonValue != totalCropValue {
-            validationMessage = "Cotton Land must equal the sum of selected crop lands (\(totalCropValue))"
-            return false
-        }
-        
-        // ✅ Images validation
-        if selectedImages.count != 2 {
-            validationMessage = "Please upload Farmer photo and Aadhar card photo"
-            return false
-        }
-        
-        // ✅ Documents validation
-        if selectedDocuments.isEmpty {
-            validationMessage = "Please upload at least 1 document"
-            return false
-        }
-
-        return true
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 }
-
 // MARK: - ImagePicker with Camera/Gallery support + 1MB limit for Gallery + Max 2 Images
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImages: [UIImage]
