@@ -30,7 +30,7 @@ struct RegistrationView: View {
     
     @State private var farmerTypes:[Title] = []
     @State private var selectedFarmerType: Title?
-    
+
     @State private var farmerName: String = ""
     @State private var fatherName: String = ""
     @State private var dob: Date = Date()
@@ -58,6 +58,12 @@ struct RegistrationView: View {
     @State private var selectedImages: [UIImage] = []
     @State private var selectedDocuments: [URL] = []
     @State private var gotoHome:Bool = false
+    
+    @State private var uniqueNames: UniqueNames?
+    @State private var text1: String = ""
+    @State private var text2: String = ""
+    @State private var text3: String = ""
+    @State private var text4: String = ""
     
     var body: some View {
         NavigationView {
@@ -253,6 +259,7 @@ struct RegistrationView: View {
                                         if let state = newValue {
                                             if state.id != 0 {
                                                 loadDistricts()
+                                                loadUniqueNames()
                                             } else {
                                                 districts = []
                                             }
@@ -465,8 +472,31 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Passbook Number
-                                    TextField("Passbook No / Khatha No", text: $passbookNumber)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
+                                        
+                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    
+                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text1)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text2)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text3)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text4)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
                                     
                                     // Total Land
                                     TextField("Total Land", text: $totalLand)
@@ -580,6 +610,54 @@ struct RegistrationView: View {
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+    }
+    
+    // MARK: - Fetching Unique Names
+    private func loadUniqueNames() {
+        if let token = SessionManager.shared.authToken,
+           let stateId = selectedState?.id {
+            
+            ApiService.shared.getUniqueNames(token: token, stateId: stateId) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let list):
+                        if let first = list.first {
+                            self.uniqueNames = first
+                        } else {
+                            // No data → reset uniqueNames
+                            self.uniqueNames = UniqueNames(
+                                uniQ_ID_1_NAMING: "",
+                                uniQ_ID_2_NAMING: "",
+                                uniQ_ID_3_NAMING: "",
+                                uniQ_ID_4_NAMING: ""
+                            )
+                        }
+                        
+                        // Always reset stored text values
+                        self.text1 = ""
+                        self.text2 = ""
+                        self.text3 = ""
+                        self.text4 = ""
+                        
+                    case .failure(let error):
+                        print("Error fetching unique names: \(error)")
+                        
+                        // Reset uniqueNames on error also
+                        self.uniqueNames = UniqueNames(
+                            uniQ_ID_1_NAMING: "",
+                            uniQ_ID_2_NAMING: "",
+                            uniQ_ID_3_NAMING: "",
+                            uniQ_ID_4_NAMING: ""
+                        )
+                        
+                        self.text1 = ""
+                        self.text2 = ""
+                        self.text3 = ""
+                        self.text4 = ""
+                    }
+                }
+            }
+        }
     }
     
     // MARK: - FarmerTypes

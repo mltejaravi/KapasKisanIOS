@@ -168,8 +168,51 @@ class ApiService: NSObject {
         }.resume()
     }
     
+    // MARK: - Unique Names
+    func getUniqueNames(
+        token: String,
+        stateId: Int,
+        completion: @escaping (Result<[UniqueNames], Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "api/UniqueNames/\(stateId)") else {
+            completion(.failure(NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]
+            )))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        session.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "No Data Received"]
+                )))
+                return
+            }
+            
+            do {
+                let uniqueNames = try JSONDecoder().decode([UniqueNames].self, from: data)
+                completion(.success(uniqueNames))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
     
-    // Generic GET helper
+    
+    // MARK: - Generic GET helper
     private func getTitles(endpoint: String, token: String, completion: @escaping (Result<[Title], Error>) -> Void) {
         guard let url = URL(string: baseURL + endpoint) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
