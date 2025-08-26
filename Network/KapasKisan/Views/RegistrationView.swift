@@ -10,11 +10,11 @@ struct RegistrationView: View {
     @State private var genders:[Title] = []
     @State private var selectedGender:Title?
     
-    @State private var states:[Title] = []
-    @State private var selectedState: Title?
-    
     @State private var categories:[Title] = []
     @State private var selectedCategory: Title?
+    
+    @State private var states:[Title] = []
+    @State private var selectedState: Title?
     
     @State private var districts:[Title] = []
     @State private var selectedDistrict: Title?
@@ -64,6 +64,9 @@ struct RegistrationView: View {
     @State private var text2: String = ""
     @State private var text3: String = ""
     @State private var text4: String = ""
+    
+    @State private var useCamera = false
+    @State private var showImageSourceActionSheet = false
     
     var body: some View {
         NavigationView {
@@ -423,10 +426,13 @@ struct RegistrationView: View {
                                         .font(.headline)
                                         .foregroundColor(.black)
                                     
-                                    // Traditional Crop
+                                    /// Traditional Crop
                                     HStack {
                                         Toggle("Traditional Crop", isOn: $isTraditional)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isTraditional) { newValue in
+                                                if !newValue { traditionalLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $traditionalLand)
                                             .disabled(!isTraditional)
@@ -434,11 +440,14 @@ struct RegistrationView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
+
                                     // HDPS
                                     HStack {
                                         Toggle("HDPS", isOn: $isHDPS)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isHDPS) { newValue in
+                                                if !newValue { hdpsLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $hdpsLand)
                                             .disabled(!isHDPS)
@@ -446,11 +455,14 @@ struct RegistrationView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
+
                                     // Desi Cotton
                                     HStack {
                                         Toggle("Desi Cotton", isOn: $isDesiCotton)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isDesiCotton) { newValue in
+                                                if !newValue { desiCottonLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $desiCottonLand)
                                             .disabled(!isDesiCotton)
@@ -458,11 +470,14 @@ struct RegistrationView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
+
                                     // Closer Spacing
                                     HStack {
                                         Toggle("Closer Spacing", isOn: $isCloserSpacing)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isCloserSpacing) { newValue in
+                                                if !newValue { closerSpacingLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $closerSpacingLand)
                                             .disabled(!isCloserSpacing)
@@ -512,7 +527,7 @@ struct RegistrationView: View {
                                 // Upload buttons
                                 Group {
                                     Button(action: {
-                                        showingImagePicker = true
+                                        showImageSourceActionSheet = true
                                     }) {
                                         Text("Upload Photo (Image Only)")
                                             .frame(maxWidth: .infinity)
@@ -521,10 +536,25 @@ struct RegistrationView: View {
                                             .foregroundColor(.white)
                                             .cornerRadius(8)
                                     }
-                                    .sheet(isPresented: $showingImagePicker) {
-                                        ImagePicker(selectedImages: $selectedImages)
+                                    .actionSheet(isPresented: $showImageSourceActionSheet) {
+                                        ActionSheet(title: Text("Select Photo Source"),
+                                                    buttons: [
+                                                        .default(Text("Camera")) {
+                                                            useCamera = true
+                                                            showingImagePicker = true
+                                                        },
+                                                        .default(Text("Gallery")) {
+                                                            useCamera = false
+                                                            showingImagePicker = true
+                                                        },
+                                                        .cancel()
+                                                    ])
                                     }
-                                    
+                                    .sheet(isPresented: $showingImagePicker) {
+                                        ImagePicker(selectedImages: $selectedImages,
+                                                    sourceType: useCamera ? .camera : .photoLibrary)
+                                    }
+                                        
                                     if !selectedImages.isEmpty {
                                         ScrollView(.horizontal) {
                                             HStack {
@@ -837,15 +867,23 @@ struct RegistrationView: View {
     }
 }
 
-// Helper view for image picker
+// MARK: - ImagePicker with Camera/Gallery support
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImages: [UIImage]
     @Environment(\.presentationMode) private var presentationMode
     
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
+        
+        if UIImagePickerController.isSourceTypeAvailable(sourceType) {
+            picker.sourceType = sourceType
+        } else {
+            picker.sourceType = .photoLibrary
+        }
+        
         picker.allowsEditing = false
         return picker
     }
@@ -863,10 +901,15 @@ struct ImagePicker: UIViewControllerRepresentable {
             self.parent = parent
         }
         
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
                 parent.selectedImages.append(image)
             }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.presentationMode.wrappedValue.dismiss()
         }
     }

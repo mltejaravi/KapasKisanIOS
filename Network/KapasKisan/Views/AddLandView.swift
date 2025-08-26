@@ -2,12 +2,7 @@ import SwiftUI
 
 struct AddLandView: View {
     // State variables for form fields
-    @State private var selectedState: String = ""
-    @State private var selectedDistrict: String = ""
-    @State private var selectedMandal: String = ""
-    @State private var selectedVillage: String = ""
-    @State private var selectedMarket: String = ""
-    @State private var uniqueId: String = ""
+    @State private var passbookNumber: String = ""
     @State private var totalLand: String = ""
     @State private var cottonLand: String = ""
     @State private var selectedMeasureType = "Acres"
@@ -24,12 +19,20 @@ struct AddLandView: View {
     @State private var isCloserSpacing = false
     @State private var closerSpacingLand = ""
     
-    // Sample data for pickers
-    private let states = ["State 1", "State 2", "State 3"]
-    private let districts = ["District 1", "District 2", "District 3"]
-    private let mandals = ["Mandal 1", "Mandal 2", "Mandal 3"]
-    private let villages = ["Village 1", "Village 2", "Village 3"]
-    private let markets = ["Market 1", "Market 2", "Market 3"]
+    @State private var states:[Title] = []
+    @State private var selectedState: Title?
+    
+    @State private var districts:[Title] = []
+    @State private var selectedDistrict: Title?
+    
+    @State private var mandals:[Title] = []
+    @State private var selectedMandal: Title?
+    
+    @State private var villages:[Title] = []
+    @State private var selectedVillage: Title?
+    
+    @State private var markets:[Title] = []
+    @State private var selectedMarket: Title?
     
     @State private var showingImagePicker = false
     @State private var showingDocumentPicker = false
@@ -38,11 +41,11 @@ struct AddLandView: View {
     @State private var gotoHome:Bool = false
     private let measureTypes = ["Acres", "Hectares"]
     
-    @State private var uniqueIdVisible = true;
-    @State private var uniqueId1Visible = false;
-    @State private var uniqueId2Visible = false;
-    @State private var uniqueId3Visible = false;
-    @State private var uniqueId4Visible = false;
+    @State private var uniqueNames: UniqueNames?
+    @State private var text1: String = ""
+    @State private var text2: String = ""
+    @State private var text3: String = ""
+    @State private var text4: String = ""
     
     var body: some View {
         NavigationView {
@@ -90,14 +93,10 @@ struct AddLandView: View {
                                         .font(.system(size: 14, weight: .bold))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     
-                                    // State selection
-                                    Text("Select State")
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .font(.system(size: 14))
-                                    
                                     Picker("Select State", selection: $selectedState) {
-                                        ForEach(states, id: \.self) { state in
-                                            Text(state).tag(state)
+                                        ForEach(states, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -109,6 +108,22 @@ struct AddLandView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: selectedState) { newValue in
+                                        mandals = []
+                                        villages = []
+                                        markets = []
+
+                                        if let state = newValue {
+                                            if state.id != 0 {
+                                                loadDistricts()
+                                                loadUniqueNames()
+                                            } else {
+                                                districts = []
+                                            }
+                                        } else {
+                                            districts = []
+                                        }
+                                    }
                                     
                                     // District selection
                                     Text("Select District")
@@ -116,8 +131,9 @@ struct AddLandView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select District", selection: $selectedDistrict) {
-                                        ForEach(districts, id: \.self) { district in
-                                            Text(district).tag(district)
+                                        ForEach(districts, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -129,15 +145,32 @@ struct AddLandView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: selectedDistrict) { newValue in
+                                        villages = []
+
+                                        if let district = newValue {
+                                            if district.id != 0 {
+                                                loadMandals()
+                                                loadMarkets()
+                                            } else {
+                                                mandals = []
+                                                markets = []
+                                            }
+                                        } else {
+                                            mandals = []
+                                            markets = []
+                                        }
+                                    }
                                     
                                     // Mandal selection
-                                    Text("Select Mandal")
+                                    Text("Select Mandal/Block")
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Mandal", selection: $selectedMandal) {
-                                        ForEach(mandals, id: \.self) { mandal in
-                                            Text(mandal).tag(mandal)
+                                    Picker("Select Mandal/Block", selection: $selectedMandal) {
+                                        ForEach(mandals, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -149,6 +182,17 @@ struct AddLandView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: selectedMandal) { newValue in
+                                        if let mandal = newValue {
+                                            if mandal.id != 0 {
+                                                loadVillages()
+                                            } else {
+                                                villages = []
+                                            }
+                                        } else {
+                                            villages = []
+                                        }
+                                    }
                                     
                                     // Village selection
                                     Text("Select Village")
@@ -156,8 +200,9 @@ struct AddLandView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Village", selection: $selectedVillage) {
-                                        ForEach(villages, id: \.self) { village in
-                                            Text(village).tag(village)
+                                        ForEach(villages, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -176,8 +221,9 @@ struct AddLandView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Market", selection: $selectedMarket) {
-                                        ForEach(markets, id: \.self) { market in
-                                            Text(market).tag(market)
+                                        ForEach(markets, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -217,6 +263,9 @@ struct AddLandView: View {
                                     HStack {
                                         Toggle("Traditional Crop", isOn: $isTraditional)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isTraditional) { newValue in
+                                                if !newValue { traditionalLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $traditionalLand)
                                             .disabled(!isTraditional)
@@ -224,11 +273,14 @@ struct AddLandView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
+
                                     // HDPS
                                     HStack {
                                         Toggle("HDPS", isOn: $isHDPS)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isHDPS) { newValue in
+                                                if !newValue { hdpsLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $hdpsLand)
                                             .disabled(!isHDPS)
@@ -236,11 +288,14 @@ struct AddLandView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
+
                                     // Desi Cotton
                                     HStack {
                                         Toggle("Desi Cotton", isOn: $isDesiCotton)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isDesiCotton) { newValue in
+                                                if !newValue { desiCottonLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $desiCottonLand)
                                             .disabled(!isDesiCotton)
@@ -248,11 +303,14 @@ struct AddLandView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
+
                                     // Closer Spacing
                                     HStack {
                                         Toggle("Closer Spacing", isOn: $isCloserSpacing)
                                             .toggleStyle(ChkCheckboxToggleStyle())
+                                            .onChange(of: isCloserSpacing) { newValue in
+                                                if !newValue { closerSpacingLand = "" }
+                                            }
                                         
                                         TextField("Crop Land (Acres)", text: $closerSpacingLand)
                                             .disabled(!isCloserSpacing)
@@ -261,9 +319,30 @@ struct AddLandView: View {
                                             .frame(height: 48)
                                     }
                                     
-                                    // Unique ID
-                                    if(uniqueIdVisible){
-                                        TextField("Enter unique ID (ex: Pattadar Pass Book Number)", text: $uniqueId)
+                                    // Passbook Number
+                                    if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
+                                        
+                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    
+                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text1)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text2)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text3)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text4)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                     }
                                     
@@ -336,8 +415,159 @@ struct AddLandView: View {
             }
             .navigationBarBackButtonHidden(true)
         }
+        .onAppear{
+            loadStates()
+        }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+    }
+    
+    // MARK: - Fetching Unique Names
+    private func loadUniqueNames() {
+        if let token = SessionManager.shared.authToken,
+           let stateId = selectedState?.id {
+            
+            ApiService.shared.getUniqueNames(token: token, stateId: stateId) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let list):
+                        if let first = list.first {
+                            self.uniqueNames = first
+                        } else {
+                            // No data → reset uniqueNames
+                            self.uniqueNames = UniqueNames(
+                                uniQ_ID_1_NAMING: "",
+                                uniQ_ID_2_NAMING: "",
+                                uniQ_ID_3_NAMING: "",
+                                uniQ_ID_4_NAMING: ""
+                            )
+                        }
+                        
+                        // Always reset stored text values
+                        self.text1 = ""
+                        self.text2 = ""
+                        self.text3 = ""
+                        self.text4 = ""
+                        
+                    case .failure(let error):
+                        print("Error fetching unique names: \(error)")
+                        
+                        // Reset uniqueNames on error also
+                        self.uniqueNames = UniqueNames(
+                            uniQ_ID_1_NAMING: "",
+                            uniQ_ID_2_NAMING: "",
+                            uniQ_ID_3_NAMING: "",
+                            uniQ_ID_4_NAMING: ""
+                        )
+                        
+                        self.text1 = ""
+                        self.text2 = ""
+                        self.text3 = ""
+                        self.text4 = ""
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - States
+    private func loadStates() {
+        if let token = SessionManager.shared.authToken{
+            ApiService.shared.getStates(token: token) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.states = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedState = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Districts
+    private func loadDistricts(){
+        if let token = SessionManager.shared.authToken,
+           let stateId = selectedState?.id {
+            ApiService.shared.getDistricts(token: token, stateId: stateId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.districts = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedDistrict = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Mandals
+    private func loadMandals(){
+        if let token = SessionManager.shared.authToken,
+           let districtId = selectedDistrict?.id {
+            ApiService.shared.getMandals(token: token, districtId: districtId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.mandals = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedMandal = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Villages
+    private func loadVillages(){
+        if let token = SessionManager.shared.authToken,
+           let mandalId = selectedMandal?.id {
+            ApiService.shared.getVillages(token: token, mandalId: mandalId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.villages = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedVillage = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Markets
+    private func loadMarkets(){
+        if let token = SessionManager.shared.authToken,
+           let districtId = selectedDistrict?.id {
+            ApiService.shared.getDistrictMarkets(token: token,
+                                                districtId: districtId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.markets = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedMarket = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
     }
 }
 

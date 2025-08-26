@@ -1,19 +1,23 @@
 import SwiftUI
 
 struct SlotBookingView: View {
-    @State private var selectedState: String = ""
-    @State private var selectedDistrict: String = ""
-    @State private var selectedMarket: String = ""
-    @State private var selectedMill: String = ""
     @State private var approxWeight: String = ""
     @State private var selectedDate = Date()
     @State private var showAvailableSlots = false
     
+    @State private var states:[Title] = []
+    @State private var selectedState: Title?
+    
+    @State private var districts:[Title] = []
+    @State private var selectedDistrict: Title?
+    
+    @State private var markets:[Title] = []
+    @State private var selectedMarket: Title?
+    
+    @State private var mills: [Title] = []
+    @State private var selectedMill: Title?
+    
     // Sample data
-    let states = ["State 1", "State 2", "State 3"]
-    let districts = ["District 1", "District 2", "District 3"]
-    let markets = ["Market 1", "Market 2", "Market 3"]
-    let mills = ["Mill 1", "Mill 2", "Mill 3"]
     let availableSlots = ["9:00 AM", "11:00 AM", "2:00 PM", "4:00 PM"]
     @State private var gotoHome:Bool = false
     
@@ -69,8 +73,9 @@ struct SlotBookingView: View {
                                     .font(.system(size: 14))
                                 
                                 Picker("Select State", selection: $selectedState) {
-                                    ForEach(states, id: \.self) { state in
-                                        Text(state).tag(state)
+                                    ForEach(states, id: \.self) { title in
+                                        Text(title.name)
+                                            .tag(Optional(title))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
@@ -82,6 +87,19 @@ struct SlotBookingView: View {
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray, lineWidth: 1)
                                 )
+                                .onChange(of: selectedState) { newValue in
+                                    markets = []
+
+                                    if let state = newValue {
+                                        if state.id != 0 {
+                                            loadDistricts()
+                                        } else {
+                                            districts = []
+                                        }
+                                    } else {
+                                        districts = []
+                                    }
+                                }
                                 
                                 // District selection
                                 Text("Select District")
@@ -89,8 +107,9 @@ struct SlotBookingView: View {
                                     .font(.system(size: 14))
                                 
                                 Picker("Select District", selection: $selectedDistrict) {
-                                    ForEach(districts, id: \.self) { district in
-                                        Text(district).tag(district)
+                                    ForEach(districts, id: \.self) { title in
+                                        Text(title.name)
+                                            .tag(Optional(title))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
@@ -102,6 +121,17 @@ struct SlotBookingView: View {
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray, lineWidth: 1)
                                 )
+                                .onChange(of: selectedDistrict) { newValue in
+                                    if let district = newValue {
+                                        if district.id != 0 {
+                                            loadMarkets()
+                                        } else {
+                                            markets = []
+                                        }
+                                    } else {
+                                        markets = []
+                                    }
+                                }
                                 
                                 // Market selection
                                 Text("Select Market")
@@ -109,8 +139,9 @@ struct SlotBookingView: View {
                                     .font(.system(size: 14))
                                 
                                 Picker("Select Market", selection: $selectedMarket) {
-                                    ForEach(markets, id: \.self) { market in
-                                        Text(market).tag(market)
+                                    ForEach(markets, id: \.self) { title in
+                                        Text(title.name)
+                                            .tag(Optional(title))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
@@ -121,7 +152,17 @@ struct SlotBookingView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray, lineWidth: 1)
-                                )
+                                ).onChange(of: selectedMarket){newValue in
+                                    if let market = newValue {
+                                        if market.id != 0 {
+                                            loadMills()
+                                        } else {
+                                            mills = []
+                                        }
+                                    } else {
+                                        mills = []
+                                    }
+                                }
                                 
                                 // Mill selection
                                 Text("Select Mill")
@@ -129,8 +170,9 @@ struct SlotBookingView: View {
                                     .font(.system(size: 14))
                                 
                                 Picker("Select Mill", selection: $selectedMill) {
-                                    ForEach(mills, id: \.self) { mill in
-                                        Text(mill).tag(mill)
+                                    ForEach(mills, id: \.self) { title in
+                                        Text(title.name)
+                                            .tag(Optional(title))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
@@ -236,6 +278,90 @@ struct SlotBookingView: View {
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .onAppear{
+            loadStates()
+        }
+    }
+    
+    // MARK: - States
+    private func loadStates() {
+        if let token = SessionManager.shared.authToken{
+            ApiService.shared.getStates(token: token) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.states = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedState = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Districts
+    private func loadDistricts(){
+        if let token = SessionManager.shared.authToken,
+           let stateId = selectedState?.id {
+            ApiService.shared.getDistricts(token: token, stateId: stateId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.districts = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedDistrict = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Markets
+    private func loadMarkets(){
+        if let token = SessionManager.shared.authToken,
+           let districtId = selectedDistrict?.id {
+            ApiService.shared.getDistrictMarkets(token: token,
+                                                districtId: districtId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.markets = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedMarket = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Mills
+    private func loadMills(){
+        if let token = SessionManager.shared.authToken,
+           let marketId = selectedMarket?.id {
+            ApiService.shared.getMills(token: token,
+                                                marketId: marketId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.mills = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedMill = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
     }
 }
 
