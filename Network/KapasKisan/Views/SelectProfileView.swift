@@ -142,18 +142,17 @@ private struct RegisterNowCard: View {
                     .cornerRadius(12)
                     .padding(.trailing, 12)
                 
-                Button(action: {
-                    // Register now action
-                }) {
+                // NavigationLink instead of Button
+                NavigationLink(destination: RegistrationView()) {
                     Text("Register Now")
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
                 }
                 .buttonStyle(PlainButtonStyle())
-                .background(Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(8)
             }
             .padding(16)
         }

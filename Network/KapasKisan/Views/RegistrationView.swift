@@ -3,21 +3,40 @@ import SwiftUI
 struct RegistrationView: View {
     // State variables for form fields
     @State private var registrationNumber: String = ""
-    @State private var selectedTitle: String = ""
+    
+    @State private var titles: [Title] = []
+    @State private var selectedTitle: Title?
+    
+    @State private var genders:[Title] = []
+    @State private var selectedGender:Title?
+    
+    @State private var states:[Title] = []
+    @State private var selectedState: Title?
+    
+    @State private var categories:[Title] = []
+    @State private var selectedCategory: Title?
+    
+    @State private var districts:[Title] = []
+    @State private var selectedDistrict: Title?
+    
+    @State private var mandals:[Title] = []
+    @State private var selectedMandal: Title?
+    
+    @State private var villages:[Title] = []
+    @State private var selectedVillage: Title?
+    
+    @State private var markets:[Title] = []
+    @State private var selectedMarket: Title?
+    
+    @State private var farmerTypes:[Title] = []
+    @State private var selectedFarmerType: Title?
+    
     @State private var farmerName: String = ""
     @State private var fatherName: String = ""
-    @State private var selectedGender: String = ""
     @State private var dob: Date = Date()
-    @State private var selectedCategory: String = ""
     @State private var aadharNumber: String = ""
     @State private var mobileNumber: String = ""
     @State private var address: String = ""
-    @State private var selectedState: String = ""
-    @State private var selectedDistrict: String = ""
-    @State private var selectedMandal: String = ""
-    @State private var selectedVillage: String = ""
-    @State private var selectedMarket: String = ""
-    @State private var selectedFarmerType: String = ""
     @State private var passbookNumber: String = ""
     @State private var totalLand: String = ""
     @State private var cottonLand: String = ""
@@ -31,16 +50,6 @@ struct RegistrationView: View {
     @State private var isCloserSpacing = false
     @State private var closerSpacingLand = ""
     
-    // Sample data for pickers
-    private let titles = ["Mr.", "Mrs.", "Ms.", "Dr."]
-    private let genders = ["Male", "Female", "Other"]
-    private let categories = ["General", "OBC", "SC", "ST"]
-    private let states = ["State 1", "State 2", "State 3"]
-    private let districts = ["District 1", "District 2", "District 3"]
-    private let mandals = ["Mandal 1", "Mandal 2", "Mandal 3"]
-    private let villages = ["Village 1", "Village 2", "Village 3"]
-    private let markets = ["Market 1", "Market 2", "Market 3"]
-    private let farmerTypes = ["Type 1", "Type 2", "Type 3"]
     private let measureTypes = ["Acres", "Hectares"]
     
     @State private var showingDatePicker = false
@@ -100,10 +109,11 @@ struct RegistrationView: View {
                                     Text("Select Title")
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
-                                    
+
                                     Picker("Select Title", selection: $selectedTitle) {
-                                        ForEach(titles, id: \.self) { title in
-                                            Text(title).tag(title)
+                                        ForEach(titles, id: \.id) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -130,8 +140,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Gender", selection: $selectedGender) {
-                                        ForEach(genders, id: \.self) { gender in
-                                            Text(gender).tag(gender)
+                                        ForEach(genders, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -176,8 +187,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Category", selection: $selectedCategory) {
-                                        ForEach(categories, id: \.self) { category in
-                                            Text(category).tag(category)
+                                        ForEach(categories, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -219,8 +231,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select State", selection: $selectedState) {
-                                        ForEach(states, id: \.self) { state in
-                                            Text(state).tag(state)
+                                        ForEach(states, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -232,6 +245,21 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: selectedState) { newValue in
+                                        mandals = []
+                                        villages = []
+                                        markets = []
+
+                                        if let state = newValue {
+                                            if state.id != 0 {
+                                                loadDistricts()
+                                            } else {
+                                                districts = []
+                                            }
+                                        } else {
+                                            districts = []
+                                        }
+                                    }
                                     
                                     // District selection
                                     Text("Select District")
@@ -239,8 +267,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select District", selection: $selectedDistrict) {
-                                        ForEach(districts, id: \.self) { district in
-                                            Text(district).tag(district)
+                                        ForEach(districts, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -252,6 +281,22 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: selectedDistrict) { newValue in
+                                        villages = []
+
+                                        if let district = newValue {
+                                            if district.id != 0 {
+                                                loadMandals()
+                                                loadMarkets()
+                                            } else {
+                                                mandals = []
+                                                markets = []
+                                            }
+                                        } else {
+                                            mandals = []
+                                            markets = []
+                                        }
+                                    }
                                     
                                     // Mandal selection
                                     Text("Select Mandal/Block")
@@ -259,8 +304,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Mandal/Block", selection: $selectedMandal) {
-                                        ForEach(mandals, id: \.self) { mandal in
-                                            Text(mandal).tag(mandal)
+                                        ForEach(mandals, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -272,6 +318,17 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: selectedMandal) { newValue in
+                                        if let mandal = newValue {
+                                            if mandal.id != 0 {
+                                                loadVillages()
+                                            } else {
+                                                villages = []
+                                            }
+                                        } else {
+                                            villages = []
+                                        }
+                                    }
                                     
                                     // Village selection
                                     Text("Select Village")
@@ -279,8 +336,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Village", selection: $selectedVillage) {
-                                        ForEach(villages, id: \.self) { village in
-                                            Text(village).tag(village)
+                                        ForEach(villages, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -299,8 +357,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Market", selection: $selectedMarket) {
-                                        ForEach(markets, id: \.self) { market in
-                                            Text(market).tag(market)
+                                        ForEach(markets, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -319,8 +378,9 @@ struct RegistrationView: View {
                                         .font(.system(size: 14))
                                     
                                     Picker("Select Farmer Type", selection: $selectedFarmerType) {
-                                        ForEach(farmerTypes, id: \.self) { type in
-                                            Text(type).tag(type)
+                                        ForEach(farmerTypes, id: \.self) { title in
+                                            Text(title.name)
+                                                .tag(Optional(title))
                                         }
                                     }
                                     .pickerStyle(MenuPickerStyle())
@@ -507,12 +567,195 @@ struct RegistrationView: View {
             .navigationBarBackButtonHidden(true)
         }
         .onAppear {
+            // Loading initials
+            loadTitles()
+            loadGenders()
+            loadCategories()
+            loadStates()
+            loadFarmerTypes()
+            
             if(SessionManager.shared.barCode != ""){
                 
             }
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+    }
+    
+    // MARK: - FarmerTypes
+    private func loadFarmerTypes(){
+        if let token = SessionManager.shared.authToken{
+            ApiService.shared.getFarmerTypes(token: token) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.farmerTypes = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedFarmerType = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - States
+    private func loadStates() {
+        if let token = SessionManager.shared.authToken{
+            ApiService.shared.getStates(token: token) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.states = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedState = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Districts
+    private func loadDistricts(){
+        if let token = SessionManager.shared.authToken,
+           let stateId = selectedState?.id {
+            ApiService.shared.getDistricts(token: token, stateId: stateId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.districts = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedDistrict = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Mandals
+    private func loadMandals(){
+        if let token = SessionManager.shared.authToken,
+           let districtId = selectedDistrict?.id {
+            ApiService.shared.getMandals(token: token, districtId: districtId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.mandals = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedMandal = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Villages
+    private func loadVillages(){
+        if let token = SessionManager.shared.authToken,
+           let mandalId = selectedMandal?.id {
+            ApiService.shared.getVillages(token: token, mandalId: mandalId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.villages = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedVillage = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Markets
+    private func loadMarkets(){
+        if let token = SessionManager.shared.authToken,
+           let districtId = selectedDistrict?.id {
+            ApiService.shared.getDistrictMarkets(token: token,
+                                                districtId: districtId ) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.markets = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedMarket = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Category/Caste
+    private func loadCategories(){
+        if let token = SessionManager.shared.authToken{
+            ApiService.shared.getCastes(token: token) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.categories = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedCategory = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Salutations
+    private func loadTitles() {
+        if let token = SessionManager.shared.authToken{
+            ApiService.shared.getSalutations(token: token) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.titles = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedTitle = first  // Default first
+                        }
+                    case .failure(let error):
+                        print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Genders
+    private func loadGenders(){
+        if let token =  SessionManager.shared.authToken{
+            ApiService.shared.getGenders(token: token){
+                result in DispatchQueue.main.async{
+                    switch result {
+                    case .success(let titlesResponse):
+                        self.genders = titlesResponse
+                        if let first = titlesResponse.first {
+                            self.selectedGender = first  
+                        }
+                    case .failure(let error):
+                        print("Error fetching genders: \(error)")
+                    }
+                }
+            }
+        }
     }
 }
 

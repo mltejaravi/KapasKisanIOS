@@ -209,12 +209,12 @@ class ApiService: NSObject {
         getTitles(endpoint: "api/Genders", token: token, completion: completion)
     }
     
-    func getStates(token: String, completion: @escaping (Result<[Title], Error>) -> Void) {
-        getTitles(endpoint: "api/States", token: token, completion: completion)
-    }
-    
     func getCastes(token: String, completion: @escaping (Result<[Title], Error>) -> Void) {
         getTitles(endpoint: "api/Castes", token: token, completion: completion)
+    }
+    
+    func getStates(token: String, completion: @escaping (Result<[Title], Error>) -> Void) {
+        getTitles(endpoint: "api/States", token: token, completion: completion)
     }
     
     func getDistricts(token: String, stateId: Int, completion: @escaping (Result<[Title], Error>) -> Void) {
@@ -229,12 +229,16 @@ class ApiService: NSObject {
         getTitles(endpoint: "api/Villages/\(mandalId)", token: token, completion: completion)
     }
     
+    func getDistrictMarkets(token: String, districtId: Int, completion: @escaping (Result<[Title], Error>) -> Void) {
+        getTitles(endpoint: "api/DistrictMarkets/\(districtId)", token: token, completion: completion)
+    }
+    
     func getMills(token: String, marketId: Int, completion: @escaping (Result<[Title], Error>) -> Void) {
         getTitles(endpoint: "api/Mills/\(marketId)", token: token, completion: completion)
     }
     
-    func getDistrictMarkets(token: String, districtId: Int, completion: @escaping (Result<[Title], Error>) -> Void) {
-        getTitles(endpoint: "api/DistrictMarkets/\(districtId)", token: token, completion: completion)
+    func getFarmerTypes(token: String, completion: @escaping (Result<[Title], Error>) -> Void){
+        getTitles(endpoint: "api/FarmerTypes", token: token, completion: completion)
     }
 }
 
