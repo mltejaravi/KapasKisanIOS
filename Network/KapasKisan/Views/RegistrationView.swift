@@ -4,6 +4,9 @@ struct RegistrationView: View {
     // State variables for form fields
     @State private var registrationNumber: String = ""
     
+    @State private var showToast = false
+    @State private var toastMessage = ""
+    
     @State private var titles: [Title] = []
     @State private var selectedTitle: Title?
     
@@ -68,6 +71,9 @@ struct RegistrationView: View {
     @State private var useCamera = false
     @State private var showImageSourceActionSheet = false
     
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -105,6 +111,7 @@ struct RegistrationView: View {
                     
                     // Scrollable form
                     ScrollView {
+                        
                         VStack(spacing: 16) {
                             // Form container
                             VStack(spacing: 16) {
@@ -191,11 +198,11 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Category selection
-                                    Text("Select Category")
+                                    Text("Select Caste")
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Category", selection: $selectedCategory) {
+                                    Picker("Select Caste", selection: $selectedCategory) {
                                         ForEach(categories, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -213,14 +220,32 @@ struct RegistrationView: View {
                                     
                                     // Aadhar Number
                                     TextField("Aadhar Number", text: $aadharNumber)
-                                        .keyboardType(.numberPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .onChange(of: aadharNumber) { newValue in
+                                        // Allow only numbers and max 12 digits
+                                        let filtered = newValue.filter { $0.isNumber }
+                                        if filtered.count > 12 {
+                                            aadharNumber = String(filtered.prefix(12))
+                                        } else {
+                                            aadharNumber = filtered
+                                        }
+                                    }
                                     
                                     // Mobile Number
                                     TextField("Mobile Number", text: $mobileNumber)
-                                        .keyboardType(.phonePad)
-                                        .disabled(true)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.phonePad)
+                                    .disabled(true)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .onChange(of: mobileNumber) { newValue in
+                                        // Allow only numbers and max 10 digits
+                                        let filtered = newValue.filter { $0.isNumber }
+                                        if filtered.count > 10 {
+                                            mobileNumber = String(filtered.prefix(10))
+                                        } else {
+                                            mobileNumber = filtered
+                                        }
+                                    }
                                 }
                                 
                                 Group {
@@ -422,6 +447,45 @@ struct RegistrationView: View {
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
                                     
+                                    
+                                    
+                                    // Passbook Number
+                                    if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
+                                        
+                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    
+                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text1)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text2)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text3)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text4)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    
+                                    // Total Land
+                                    TextField("Total Land", text: $totalLand)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
+                                    // Cotton Land
+                                    TextField("Cotton Land", text: $cottonLand)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
                                     Text("Select Crop Type")
                                         .font(.headline)
                                         .foregroundColor(.black)
@@ -485,43 +549,6 @@ struct RegistrationView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
-                                    // Passbook Number
-                                    if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
-                                       (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
-                                       (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
-                                       (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
-                                        
-                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    
-                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text1)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text2)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text3)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text4)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    
-                                    // Total Land
-                                    TextField("Total Land", text: $totalLand)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    // Cotton Land
-                                    TextField("Cotton Land", text: $cottonLand)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
                                 }
                                 
                                 // Upload buttons
@@ -529,7 +556,7 @@ struct RegistrationView: View {
                                     Button(action: {
                                         showImageSourceActionSheet = true
                                     }) {
-                                        Text("Upload Photo (Image Only)")
+                                        Text("Upload Farmer Photo and Aadhar (Image Only)")
                                             .frame(maxWidth: .infinity)
                                             .padding()
                                             .background(Color.blue)
@@ -552,6 +579,8 @@ struct RegistrationView: View {
                                     }
                                     .sheet(isPresented: $showingImagePicker) {
                                         ImagePicker(selectedImages: $selectedImages,
+                                                    showToast: $showToast,
+                                                    toastMessage: $toastMessage,
                                                     sourceType: useCamera ? .camera : .photoLibrary)
                                     }
                                         
@@ -601,11 +630,42 @@ struct RegistrationView: View {
                     }
                 }
                 
+                // Toast overlay - Should be at this level in ZStack
+                if showToast {
+                    VStack {
+                        Spacer()
+                        Text(toastMessage)
+                            .padding()
+                            .background(Color.black.opacity(0.8))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .padding(.bottom, 20)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    withAnimation {
+                                        showToast = false
+                                    }
+                                }
+                            }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .zIndex(1000)
+                }
+                
+                
                 // Submit button (fixed at bottom)
                 VStack {
                     Spacer()
                     Button(action: {
                         // Submit registration
+                        if validateForm() {
+                            // ✅ Proceed with API call / submission
+                            print("Form valid, submit data here")
+                        } else {
+                            // ❌ Show alert
+                            showValidationAlert = true
+                        }
                     }) {
                         Text("Submit Registration")
                             .font(.system(size: 18, weight: .bold))
@@ -618,6 +678,9 @@ struct RegistrationView: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
+                    .alert(isPresented: $showValidationAlert) {
+                        Alert(title: Text("Validation Error"), message: Text(validationMessage), dismissButton: .default(Text("OK")))
+                    }
                 }
             }
             .navigationBarHidden(true)
@@ -628,6 +691,8 @@ struct RegistrationView: View {
         }
         .onAppear {
             // Loading initials
+            mobileNumber = SessionManager.shared.mobileNumber ?? ""
+            
             loadTitles()
             loadGenders()
             loadCategories()
@@ -865,11 +930,195 @@ struct RegistrationView: View {
             }
         }
     }
+    
+    // MARK: - Validation
+    private func validateForm() -> Bool {
+        if selectedTitle == nil || selectedTitle?.id == 0{
+            validationMessage = "Please select a Title"
+            return false
+        }
+        if farmerName.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Farmer Name"
+            return false
+        }
+        if fatherName.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Father's Name"
+            return false
+        }
+        if selectedGender == nil || selectedGender?.id == 0 {
+            validationMessage = "Please select Gender"
+            return false
+        }
+        // ✅ DOB validation
+        let calendar = Calendar.current
+        let today = Date()
+
+        // Ensure DOB is not default and age >= 1 year
+        if dob == Date() {
+            validationMessage = "Please select Date of Birth"
+            return false
+        }
+
+        if let age = calendar.dateComponents([.year], from: dob, to: today).year {
+            if age < 1 {
+                validationMessage = "Farmer must be at least 1 year old"
+                return false
+            }
+        }
+        
+        if(selectedCategory == nil || selectedCategory?.id == 0){
+            validationMessage = "Please select Caste"
+            return false
+        }
+        
+        if aadharNumber.count != 12 {
+            validationMessage = "Aadhar number must be 12 digits"
+            return false
+        }
+        if mobileNumber.count != 10 {
+            validationMessage = "Mobile number must be 10 digits"
+            return false
+        }
+        if address.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Address"
+            return false
+        }
+        if selectedState == nil || selectedState?.id == 0 {
+            validationMessage = "Please select State"
+            return false
+        }
+        if selectedDistrict == nil || selectedDistrict?.id == 0 {
+            validationMessage = "Please select District"
+            return false
+        }
+        if selectedMandal == nil || selectedMandal?.id == 0 {
+            validationMessage = "Please select Mandal"
+            return false
+        }
+        if selectedVillage == nil || selectedVillage?.id == 0 {
+            validationMessage = "Please select Village"
+            return false
+        }
+        if selectedMarket == nil || selectedMarket?.id == 0 {
+            validationMessage = "Please select Market"
+            return false
+        }
+        if selectedFarmerType == nil {
+            validationMessage = "Please select Farmer Type"
+            return false
+        }
+
+        // ✅ Land values
+        if totalLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Total Land"
+            return false
+        }
+        if cottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Cotton Land"
+            return false
+        }
+
+        // ✅ Unique Names validation
+        if let uniqueNames = uniqueNames {
+            var hasUniqueNames = false
+
+            if let name = uniqueNames.uniQ_ID_1_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text1.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            if let name = uniqueNames.uniQ_ID_2_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text2.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            if let name = uniqueNames.uniQ_ID_3_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text3.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            if let name = uniqueNames.uniQ_ID_4_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text4.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            // ✅ Else case: if no unique names are present → validate passbookNumber
+            if !hasUniqueNames {
+                if passbookNumber.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter Passbook No / Khatha No"
+                    return false
+                }
+            }
+        }
+
+        // ✅ Crop Types validation
+        if !(isTraditional || isHDPS || isDesiCotton || isCloserSpacing) {
+            validationMessage = "Please select at least one Crop Type"
+            return false
+        }
+        if isTraditional && traditionalLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for Traditional Crop"
+            return false
+        }
+        if isHDPS && hdpsLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for HDPS"
+            return false
+        }
+        if isDesiCotton && desiCottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for Desi Cotton"
+            return false
+        }
+        if isCloserSpacing && closerSpacingLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for Closer Spacing"
+            return false
+        }
+        // ✅ Cotton Land total check
+        let cottonValue = Double(cottonLand) ?? 0
+        let traditionalValue = isTraditional ? (Double(traditionalLand) ?? 0) : 0
+        let hdpsValue = isHDPS ? (Double(hdpsLand) ?? 0) : 0
+        let desiCottonValue = isDesiCotton ? (Double(desiCottonLand) ?? 0) : 0
+        let closerSpacingValue = isCloserSpacing ? (Double(closerSpacingLand) ?? 0) : 0
+
+        let totalCropValue = traditionalValue + hdpsValue + desiCottonValue + closerSpacingValue
+
+        if cottonValue != totalCropValue {
+            validationMessage = "Cotton Land must equal the sum of selected crop lands (\(totalCropValue))"
+            return false
+        }
+        
+        // ✅ Images validation
+        if selectedImages.count != 2 {
+            validationMessage = "Please upload Farmer photo and Aadhar card photo"
+            return false
+        }
+        
+        // ✅ Documents validation
+        if selectedDocuments.isEmpty {
+            validationMessage = "Please upload at least 1 document"
+            return false
+        }
+
+        return true
+    }
 }
 
-// MARK: - ImagePicker with Camera/Gallery support
+// MARK: - ImagePicker with Camera/Gallery support + 1MB limit for Gallery + Max 2 Images
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImages: [UIImage]
+    @Binding var showToast: Bool
+    @Binding var toastMessage: String
     @Environment(\.presentationMode) private var presentationMode
     
     var sourceType: UIImagePickerController.SourceType = .photoLibrary
@@ -903,9 +1152,39 @@ struct ImagePicker: UIViewControllerRepresentable {
         
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.selectedImages.append(image)
+            
+            guard parent.selectedImages.count < 2 else {
+                parent.showToast = true
+                parent.toastMessage = "You can only select up to 2 images."
+                parent.presentationMode.wrappedValue.dismiss()
+                return
             }
+            
+            if let image = info[.originalImage] as? UIImage {
+                
+                if picker.sourceType == .photoLibrary {
+                    // ✅ Restrict to 1 MB only for Gallery images
+                    var compression: CGFloat = 1.0
+                    var imageData = image.jpegData(compressionQuality: compression)
+                    
+                    while let data = imageData, data.count > 1_048_576 && compression > 0.1 {
+                        compression -= 0.1
+                        imageData = image.jpegData(compressionQuality: compression)
+                    }
+                    
+                    if let finalData = imageData, finalData.count <= 1_048_576,
+                       let finalImage = UIImage(data: finalData) {
+                        parent.selectedImages.append(finalImage)
+                    } else {
+                        parent.showToast = true
+                        parent.toastMessage = "Please select an image smaller than 1 MB."
+                    }
+                } else {
+                    // ✅ Camera images → no restriction
+                    parent.selectedImages.append(image)
+                }
+            }
+            
             parent.presentationMode.wrappedValue.dismiss()
         }
         
