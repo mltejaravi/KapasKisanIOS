@@ -582,14 +582,28 @@ struct RegistrationView: View {
                                     if !selectedImages.isEmpty {
                                         ScrollView(.horizontal) {
                                             HStack {
-                                                ForEach(selectedImages, id: \.self) { image in
-                                                    Image(uiImage: image)
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 100, height: 100)
-                                                        .cornerRadius(8)
+                                                ForEach(Array(selectedImages.enumerated()), id: \.element) { index, image in
+                                                    ZStack(alignment: .topTrailing) {
+                                                        Image(uiImage: image)
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 100, height: 100)
+                                                            .cornerRadius(8)
+                                                            .clipped()
+                                                        
+                                                        // Close button
+                                                        Button(action: {
+                                                            selectedImages.remove(at: index)
+                                                        }) {
+                                                            Image(systemName: "xmark.circle.fill")
+                                                                .foregroundColor(.red)
+                                                                .background(Color.white.clipShape(Circle()))
+                                                        }
+                                                        .offset(x: 5, y: -5) // position top-right
+                                                    }
                                                 }
                                             }
+                                            .padding(.horizontal)
                                         }
                                         .frame(height: 100)
                                     }
@@ -606,10 +620,30 @@ struct RegistrationView: View {
                                     }
                                     
                                     if !selectedDocuments.isEmpty {
-                                        VStack(alignment: .leading) {
-                                            ForEach(selectedDocuments, id: \.self) { url in
-                                                Text(url.lastPathComponent)
-                                                    .padding(4)
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            ForEach(Array(selectedDocuments.enumerated()), id: \.element) { index, url in
+                                                HStack {
+                                                    Image(systemName: "doc.text.fill")
+                                                        .foregroundColor(.blue)
+                                                    
+                                                    Text(url.lastPathComponent)
+                                                        .lineLimit(1)
+                                                        .truncationMode(.middle)
+                                                    
+                                                    Spacer()
+                                                    
+                                                    // Close button
+                                                    Button(action: {
+                                                        selectedDocuments.remove(at: index)
+                                                    }) {
+                                                        Image(systemName: "xmark.circle.fill")
+                                                            .foregroundColor(.red)
+                                                            .background(Color.white.clipShape(Circle()))
+                                                    }
+                                                }
+                                                .padding(8)
+                                                .background(Color.gray.opacity(0.1))
+                                                .cornerRadius(8)
                                             }
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading)
