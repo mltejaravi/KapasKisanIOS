@@ -1167,15 +1167,75 @@ struct RegistrationView: View {
                 switch result {
                 case .success(let response):
                     if let firstResponse = response.first {
-                        showValidationAlert = true
-                        validationTitle = "Registration Successful!"
-                        validationMessage = "Registration successful with BarCode: \(firstResponse.Barcode ?? "N/A")!"
-                        // DON'T set gotoHome here - let the alert handle it
+                        
+                        // Ensure we have selected images/documents
+                        guard !selectedImages.isEmpty || !selectedDocuments.isEmpty else {
+                            showValidationAlert = true
+                            validationTitle = "Registration Successful!"
+                            validationMessage = "Registration successful with BarCode: \(firstResponse.Barcode ?? "N/A")!"
+                            return
+                        }
+                        
+                        // Convert images to FarmerDocsRequest objects
+                        var docsRequests: [FarmerDocsRequest] = []
+                        
+                        for image in selectedImages {
+                            if let imageData = image.jpegData(compressionQuality: 0.8) {
+                                let base64String = imageData.base64EncodedString()
+                                let docRequest = FarmerDocsRequest(
+                                    farmerID: Decimal(firstResponse.Pk_FarmerID ?? 0),
+                                    typeID: 1, // Adjust TypeID if needed
+                                    proof: base64String,
+                                    type: "Image"
+                                )
+                                docsRequests.append(docRequest)
+                            }
+                        }
+                        
+                        // Convert documents from URLs to Base64
+                        for docURL in selectedDocuments {
+                            if let data = try? Data(contentsOf: docURL) {
+                                let base64String = data.base64EncodedString()
+                                let docRequest = FarmerDocsRequest(
+                                    farmerID: Decimal(firstResponse.Pk_FarmerID ?? 0),
+                                    typeID: 2, // Adjust TypeID if needed
+                                    proof: base64String,
+                                    type: "Document"
+                                )
+                                docsRequests.append(docRequest)
+                            }
+                        }
+                        
+                        // Upload all docs sequentially
+                        func uploadNext(index: Int) {
+                            guard index < docsRequests.count else {
+                                // All uploads completed
+                                showValidationAlert = true
+                                validationTitle = "Registration Successful!"
+                                validationMessage = "Registration successful with BarCode: \(firstResponse.Barcode ?? "N/A")!"
+                                return
+                            }
+                            
+                            ApiService.shared.uploadFarmerDocs(token: token, request: docsRequests[index]) { result in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success(_):
+                                        // Upload next document
+                                        uploadNext(index: index + 1)
+                                    case .failure(let error):
+                                        showToast = true
+                                        toastMessage = "Document upload failed: \(error.localizedDescription)"
+                                    }
+                                }
+                            }
+                        }
+                        
+                        uploadNext(index: 0)
+                        
                     } else {
                         showToast = true
                         toastMessage = "Registration failed: Empty response"
                     }
-                    
                 case .failure(let error):
                     showToast = true
                     let nsError = error as NSError
@@ -1217,6 +1277,7 @@ struct RegistrationView: View {
         return formatter.string(from: date)
     }
 }
+
 // MARK: - ImagePicker with Camera/Gallery support + 1MB limit for Gallery + Max 2 Images
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImages: [UIImage]

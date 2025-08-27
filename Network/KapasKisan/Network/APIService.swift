@@ -351,6 +351,51 @@ class ApiService: NSObject {
             }
         }.resume()
     }
+    
+    // MARK: - Upload farmer docs
+    func uploadFarmerDocs(token: String, request: FarmerDocsRequest, completion: @escaping (Result<String, Error>) -> Void) {
+            guard let url = URL(string: baseURL + "farmerdocs") else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
+                return
+            }
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.httpMethod = "POST"
+            urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            do {
+                let jsonData = try JSONEncoder().encode(request)
+                urlRequest.httpBody = jsonData
+                
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    print("Request JSON: \(jsonString)")
+                }
+            } catch {
+                completion(.failure(error))
+                return
+            }
+            
+            session.dataTask(with: urlRequest) { data, response, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let data = data else {
+                    completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey : "No Data Received"])))
+                    return
+                }
+                
+                // Optionally, parse a response
+                if let responseString = String(data: data, encoding: .utf8) {
+                    completion(.success(responseString))
+                } else {
+                    completion(.failure(NSError(domain: "", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
+                }
+                
+            }.resume()
+        }
 }
 
 // MARK: - Allow Self-Signed SSL Certificates (DEV ONLY)
