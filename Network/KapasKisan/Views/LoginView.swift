@@ -30,7 +30,7 @@ struct LoginView: View {
                         }
                         
                         VStack(spacing: 16) {
-                            Text("Kapas Mitra")
+                            Text("Kapas Kisan")
                                 .font(.system(size: 25, weight: .bold))
                                 .foregroundColor(.black)
                                 .padding(.bottom, 12)
@@ -128,7 +128,14 @@ struct LoginView: View {
                             
                             if showOtpField {
                                 Button(action: {
-                                    if txtOtp == generatedOTP {
+                                    // Default login for testing
+                                    if txtMobileNumber == "1111111111" && txtOtp == "0000" {
+                                        showInvalidOtpWarning = false
+                                        navigateToSelectProfile = true
+                                        SessionManager.shared.mobileNumber = txtMobileNumber
+                                    }
+                                    // Regular OTP verification
+                                    else if txtOtp == generatedOTP {
                                         showInvalidOtpWarning = false
                                         navigateToSelectProfile = true
                                         SessionManager.shared.mobileNumber = txtMobileNumber
