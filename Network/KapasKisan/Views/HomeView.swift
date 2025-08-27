@@ -6,6 +6,10 @@ struct HomeView: View {
     @State private var regStatus: String = ""
     @State private var regRemarks: String = ""
     
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
+    @State private var validationTitle = ""
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -15,7 +19,6 @@ struct HomeView: View {
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        
                         // Main content card
                         CardView {
                             VStack(spacing: 16) {
@@ -32,45 +35,52 @@ struct HomeView: View {
                                     .padding(.bottom, 16)
                                 
                                 Text(regRemarks)   // bind state variable here
-                                            .font(.system(size: 18, weight: .medium))
-                                            .foregroundColor(.black)
-                                            .padding(.bottom, 16)
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundColor(.black)
+                                    .padding(.bottom, 16)
                                 
                                 // Menu options
-                                MenuCard(
-                                    iconName: "person.crop.circle",
-                                    buttonText: "Change Profile",
-                                    buttonColor: .blue,
-                                    destination: SelectProfileView()
-                                )
+                                MenuCard(iconName: "person.crop.circle",
+                                         buttonText: "Change Profile",
+                                         buttonColor: .blue,
+                                         destination: SelectProfileView(),
+                                         showValidationAlert: .constant(false),
+                                         validationTitle: .constant(""),
+                                         validationMessage: .constant(""))
                                 
-                                MenuCard(
-                                    iconName: "person.badge.plus",
-                                    buttonText: "Register Now",
-                                    buttonColor: .green,
-                                    destination: RegistrationView()
-                                )
+                                MenuCard(iconName: "person.badge.plus",
+                                         buttonText: "Register Now",
+                                         buttonColor: .green,
+                                         destination: RegistrationView(),
+                                         showValidationAlert: .constant(false),
+                                         validationTitle: .constant(""),
+                                         validationMessage: .constant(""))
                                 
-                                MenuCard(
-                                    iconName: "calendar.badge.clock",
-                                    buttonText: "Book a Slot",
-                                    buttonColor: .blue,
-                                    destination: SlotBookingView()
-                                )
+                                MenuCard(iconName: "calendar.badge.clock",
+                                         buttonText: "Book a Slot",
+                                         buttonColor: .blue,
+                                         destination: SlotBookingView(),
+                                         requiresActiveFarmer: true,
+                                         showValidationAlert: $showValidationAlert,
+                                         validationTitle: $validationTitle,
+                                         validationMessage: $validationMessage)
                                 
-                                MenuCard(
-                                    iconName: "plus.viewfinder",
-                                    buttonText: "Add Land",
-                                    buttonColor: .blue,
-                                    destination: AddLandView()
-                                )
+                                MenuCard(iconName: "plus.viewfinder",
+                                         buttonText: "Add Land",
+                                         buttonColor: .blue,
+                                         destination: AddLandView(),
+                                         requiresActiveFarmer: true,
+                                         showValidationAlert: $showValidationAlert,
+                                         validationTitle: $validationTitle,
+                                         validationMessage: $validationMessage)
                                 
-                                MenuCard(
-                                    iconName: "info.square",
-                                    buttonText: "Slot Information",
-                                    buttonColor: .blue,
-                                    destination: SlotInfoView()
-                                )
+                                MenuCard(iconName: "info.square",
+                                         buttonText: "Slot Information",
+                                         buttonColor: .blue,
+                                         destination: SlotInfoView(),
+                                         showValidationAlert: .constant(false),
+                                         validationTitle: .constant(""),
+                                         validationMessage: .constant(""))
                                 
                                 // Sales Info (no navigation yet)
                                 CardView(cornerRadius: 12, elevation: 4) {
@@ -97,12 +107,13 @@ struct HomeView: View {
                                 }
                                 .padding(.bottom, 16)
                                 
-                                MenuCard(
-                                    iconName: "info.circle",
-                                    buttonText: "About Us",
-                                    buttonColor: Color.orange,
-                                    destination: AboutView()
-                                )
+                                MenuCard(iconName: "info.circle",
+                                         buttonText: "About Us",
+                                         buttonColor: Color.orange,
+                                         destination: AboutView(),
+                                         showValidationAlert: .constant(false),
+                                         validationTitle: .constant(""),
+                                         validationMessage: .constant(""))
                                 
                                 // Logout
                                 NavigationLink(
@@ -160,19 +171,21 @@ struct HomeView: View {
                     .padding(8)
                 }
             }
-            .navigationBarHidden(true) // Hide default nav bar
-            .navigationBarBackButtonHidden(true) // Hide back button globally
+            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
         .onAppear {
             if let token = SessionManager.shared.authToken,
                let barcode = SessionManager.shared.barCode {
-                if(barcode != "" && barcode != "Select BarCode"){
+                if barcode != "" && barcode != "Select BarCode" {
                     ApiService.shared.getFarmerDetailsByBarcode(token: token, barCode: barcode) { result in
-                        switch result{
+                        switch result {
                         case .success(let farmerDetails):
                             DispatchQueue.main.async {
-                                if let first = farmerDetails.first{
+                                if let first = farmerDetails.first {
                                     SessionManager.shared.farmerDetails = first
                                     regStatus = "Farmer is already registered with barcode: \(barcode)"
                                     regRemarks = first.regRemarks ?? ""
@@ -182,51 +195,81 @@ struct HomeView: View {
                             print("⚠️ Failed to fetch farmer details: \(error)")
                         }
                     }
-                }
-                else{
+                } else {
                     regStatus = "Farmer is not registered"
                 }
             } else {
                 print("⚠️ Missing token or barcode")
             }
         }
-        .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
     }
 }
 
-// MARK: - Reusable MenuCard
 struct MenuCard<Destination: View>: View {
     let iconName: String
     let buttonText: String
     let buttonColor: Color
     let destination: Destination
     
+    // Optional parameters for active farmer check
+    var requiresActiveFarmer: Bool = false
+    @Binding var showValidationAlert: Bool
+    @Binding var validationTitle: String
+    @Binding var validationMessage: String
+    
+    // Internal state for navigation
+    @State private var navigate: Bool = false
+    
     var body: some View {
-        NavigationLink(destination: destination.navigationBarBackButtonHidden(true)) {
-            HStack(spacing: 10) {
-                Image(systemName: iconName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
-                    .padding(8)
-                    .background(buttonColor.opacity(0.2))
-                    .foregroundColor(buttonColor)
-                    .cornerRadius(8)
-                    .padding(.trailing, 8)
-                
-                Text(buttonText)
-                    .font(.system(size: 18, weight: .medium))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(buttonColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+        VStack {
+            NavigationLink(
+                destination: destination.navigationBarBackButtonHidden(true),
+                isActive: $navigate
+            ) {
+                EmptyView()
             }
-            .padding(16)
+            .hidden()
+            
+            Button(action: {
+                if requiresActiveFarmer,
+                   let farmer = SessionManager.shared.farmerDetails,
+                   !(farmer.isActive ?? false) {
+                    showValidationAlert = true
+                    validationTitle = "User is inactive"
+                    validationMessage = "Please contact the administrator."
+                } else {
+                    navigate = true
+                }
+            }) {
+                HStack(spacing: 10) {
+                    Image(systemName: iconName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .padding(8)
+                        .background(buttonColor.opacity(0.2))
+                        .foregroundColor(buttonColor)
+                        .cornerRadius(8)
+                        .padding(.trailing, 8)
+                    
+                    Text(buttonText)
+                        .font(.system(size: 18, weight: .medium))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(buttonColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+                .padding(16)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
-        .buttonStyle(PlainButtonStyle())
         .padding(.bottom, 16)
+        .alert(isPresented: $showValidationAlert) {
+            Alert(title: Text(validationTitle),
+                  message: Text(validationMessage),
+                  dismissButton: .default(Text("OK")))
+        }
     }
 }
 

@@ -468,7 +468,8 @@ struct AddLandView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                     .alert(isPresented: $showValidationAlert) {
-                        if validationTitle == "Land Added!" {
+                        if validationTitle == "Land Added!"
+                            || validationTitle == "User is inactive" {
                             return Alert(
                                 title: Text(validationTitle),
                                 message: Text(validationMessage),
