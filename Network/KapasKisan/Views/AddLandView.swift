@@ -47,6 +47,13 @@ struct AddLandView: View {
     @State private var text3: String = ""
     @State private var text4: String = ""
     
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
+    @State private var validationTitle = ""
+    
+    @State private var showToast = false
+    @State private var toastMessage = ""
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -62,18 +69,16 @@ struct AddLandView: View {
                     
                     // Header with back button and title
                     HStack {
-                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
-                            Button(action: {
-                                gotoHome = true
-                            }) {
-                                Image(systemName: "arrow.backward")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.black)
-                                    .frame(width: 60, height: 60)
-                                    .contentShape(Rectangle())
-                            }
-                            .padding(.leading, 12)
+                        Button(action: {
+                            gotoHome = true
+                        }) {
+                            Image(systemName: "arrow.backward")
+                                .font(.system(size: 24))
+                                .foregroundColor(.black)
+                                .frame(width: 60, height: 60)
+                                .contentShape(Rectangle())
                         }
+                        .padding(.leading, 12)
                         
                         Text("Add Land")
                             .font(.system(size: 24, weight: .bold))
@@ -92,6 +97,10 @@ struct AddLandView: View {
                                     Text("Land Details")
                                         .font(.system(size: 14, weight: .bold))
                                         .frame(maxWidth: .infinity, alignment: .leading)
+                                    
+                                    Text("Select State")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .font(.system(size: 14))
                                     
                                     Picker("Select State", selection: $selectedState) {
                                         ForEach(states, id: \.self) { title in
@@ -255,6 +264,45 @@ struct AddLandView: View {
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
                                     
+                                    
+                                    
+                                    // Passbook Number
+                                    if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
+                                       (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
+                                        
+                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    
+                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text1)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text2)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text3)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
+                                        TextField(name, text: $text4)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    }
+                                    
+                                    // Total Land
+                                    TextField("Total Land", text: $totalLand)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
+                                    // Cotton Land
+                                    TextField("Cotton Land", text: $cottonLand)
+                                        .keyboardType(.decimalPad)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
                                     Text("Select Crop Type")
                                         .font(.headline)
                                         .foregroundColor(.black)
@@ -318,44 +366,9 @@ struct AddLandView: View {
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
                                     }
-                                    
-                                    // Passbook Number
-                                    if (uniqueNames?.uniQ_ID_1_NAMING?.isEmpty ?? true) &&
-                                       (uniqueNames?.uniQ_ID_2_NAMING?.isEmpty ?? true) &&
-                                       (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
-                                       (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
-                                        
-                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    
-                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text1)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text2)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text3)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text4)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    
-                                    // Total Land
-                                    TextField("Total Land", text: $totalLand)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    // Cotton Land
-                                    TextField("Cotton Land", text: $cottonLand)
-                                        .keyboardType(.decimalPad)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
                                 }
+                                
+                                
                                 
                                 // Upload buttons
                                 Group {
@@ -371,10 +384,30 @@ struct AddLandView: View {
                                     }
                                     
                                     if !selectedDocuments.isEmpty {
-                                        VStack(alignment: .leading) {
-                                            ForEach(selectedDocuments, id: \.self) { url in
-                                                Text(url.lastPathComponent)
-                                                    .padding(4)
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            ForEach(Array(selectedDocuments.enumerated()), id: \.element) { index, url in
+                                                HStack {
+                                                    Image(systemName: "doc.text.fill")
+                                                        .foregroundColor(.blue)
+                                                    
+                                                    Text(url.lastPathComponent)
+                                                        .lineLimit(1)
+                                                        .truncationMode(.middle)
+                                                    
+                                                    Spacer()
+                                                    
+                                                    // Close button
+                                                    Button(action: {
+                                                        selectedDocuments.remove(at: index)
+                                                    }) {
+                                                        Image(systemName: "xmark.circle.fill")
+                                                            .foregroundColor(.red)
+                                                            .background(Color.white.clipShape(Circle()))
+                                                    }
+                                                }
+                                                .padding(8)
+                                                .background(Color.gray.opacity(0.1))
+                                                .cornerRadius(8)
                                             }
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -390,11 +423,38 @@ struct AddLandView: View {
                     }
                 }
                 
+                // Toast overlay
+                if showToast {
+                    VStack {
+                        Spacer()
+                        Text(toastMessage)
+                            .padding()
+                            .background(Color.black.opacity(0.8))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .padding(.bottom, 20)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    withAnimation {
+                                        showToast = false
+                                    }
+                                }
+                            }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .zIndex(1000)
+                }
+                
                 // Add Land button (fixed at bottom)
                 VStack {
                     Spacer()
                     Button(action: {
-                        // Add land action
+                        if validateForm() {
+                            AddLand()
+                        } else {
+                            showValidationAlert = true
+                        }
                     }) {
                         Text("Add Land")
                             .font(.system(size: 18, weight: .bold))
@@ -407,12 +467,35 @@ struct AddLandView: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
+                    .alert(isPresented: $showValidationAlert) {
+                        if validationTitle == "Land Added!" {
+                            return Alert(
+                                title: Text(validationTitle),
+                                message: Text(validationMessage),
+                                dismissButton: .default(Text("OK")) {
+                                    // This triggers navigation
+                                    gotoHome = true
+                                }
+                            )
+                        } else {
+                            return Alert(
+                                title: Text(validationTitle),
+                                message: Text(validationMessage),
+                                dismissButton: .default(Text("OK"))
+                            )
+                        }
+                    }
                 }
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showingDocumentPicker) {
                 DocumentPicker(selectedDocuments: $selectedDocuments)
             }
+            .background(
+                NavigationLink(destination: HomeView(), isActive: $gotoHome) {
+                    EmptyView()
+                }
+            )
             .navigationBarBackButtonHidden(true)
         }
         .onAppear{
@@ -421,6 +504,8 @@ struct AddLandView: View {
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
+    
+    
     
     // MARK: - Fetching Unique Names
     private func loadUniqueNames() {
@@ -564,6 +649,266 @@ struct AddLandView: View {
                         }
                     case .failure(let error):
                         print("Error fetching titles: \(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Validation
+    private func validateForm() -> Bool {
+        validationTitle = "Validation Error"
+        if selectedState == nil || selectedState?.id == 0 {
+            validationMessage = "Please select State"
+            return false
+        }
+        if selectedDistrict == nil || selectedDistrict?.id == 0 {
+            validationMessage = "Please select District"
+            return false
+        }
+        if selectedMandal == nil || selectedMandal?.id == 0 {
+            validationMessage = "Please select Mandal"
+            return false
+        }
+        if selectedVillage == nil || selectedVillage?.id == 0 {
+            validationMessage = "Please select Village"
+            return false
+        }
+        if selectedMarket == nil || selectedMarket?.id == 0 {
+            validationMessage = "Please select Market"
+            return false
+        }
+
+        // ✅ Land values
+        if totalLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Total Land"
+            return false
+        }
+        if cottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter Cotton Land"
+            return false
+        }
+
+        // ✅ Unique Names validation
+        if let uniqueNames = uniqueNames {
+            var hasUniqueNames = false
+
+            if let name = uniqueNames.uniQ_ID_1_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text1.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            if let name = uniqueNames.uniQ_ID_2_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text2.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            if let name = uniqueNames.uniQ_ID_3_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text3.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            if let name = uniqueNames.uniQ_ID_4_NAMING, !name.isEmpty {
+                hasUniqueNames = true
+                if text4.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter \(name)"
+                    return false
+                }
+            }
+
+            // ✅ Else case: if no unique names are present → validate passbookNumber
+            if !hasUniqueNames {
+                if passbookNumber.trimmingCharacters(in: .whitespaces).isEmpty {
+                    validationMessage = "Please enter Passbook No / Khatha No"
+                    return false
+                }
+            }
+        }
+
+        // ✅ Crop Types validation
+        if !(isTraditional || isHDPS || isDesiCotton || isCloserSpacing) {
+            validationMessage = "Please select at least one Crop Type"
+            return false
+        }
+        if isTraditional && traditionalLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for Traditional Crop"
+            return false
+        }
+        if isHDPS && hdpsLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for HDPS"
+            return false
+        }
+        if isDesiCotton && desiCottonLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for Desi Cotton"
+            return false
+        }
+        if isCloserSpacing && closerSpacingLand.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter land for Closer Spacing"
+            return false
+        }
+        // ✅ Cotton Land total check
+        let cottonValue = Double(cottonLand) ?? 0
+        let traditionalValue = isTraditional ? (Double(traditionalLand) ?? 0) : 0
+        let hdpsValue = isHDPS ? (Double(hdpsLand) ?? 0) : 0
+        let desiCottonValue = isDesiCotton ? (Double(desiCottonLand) ?? 0) : 0
+        let closerSpacingValue = isCloserSpacing ? (Double(closerSpacingLand) ?? 0) : 0
+
+        let totalCropValue = traditionalValue + hdpsValue + desiCottonValue + closerSpacingValue
+
+        if cottonValue != totalCropValue {
+            validationMessage = "Cotton Land must equal the sum of selected crop lands (\(totalCropValue))"
+            return false
+        }
+        
+        // ✅ Images validation
+//        if selectedImages.count != 2 {
+//            validationMessage = "Please upload Farmer photo and Aadhar card photo"
+//            return false
+//        }
+        
+        // ✅ Documents validation
+        if selectedDocuments.isEmpty {
+            validationMessage = "Please upload at least 1 document"
+            return false
+        }
+
+        return true
+    }
+    
+    // MARK: - Add Land Submit
+    private func AddLand() {
+        let landRequest = AddLandExtendedRequest(
+            farmerId: SessionManager.shared.farmerDetails?.pkFarmerID ?? 0,
+            totalLand: Double(totalLand) ?? 0.00,
+            cottonLand: Double(cottonLand) ?? 0.00,
+            marketId: selectedMarket?.id ?? 0,
+            villageId: selectedVillage?.id ?? 0,
+            uniqueId: passbookNumber,
+            uniq1: text1.isEmpty ? nil : text1,
+            uniq2: text2.isEmpty ? nil : text2,
+            uniq3: text3.isEmpty ? nil : text3,
+            uniq4: text4.isEmpty ? nil : text4,
+            tc: isTraditional ? Double(traditionalLand) : nil,
+            hd: isHDPS ? Double(hdpsLand) : nil,
+            dc: isDesiCotton ? Double(desiCottonLand) : nil,
+            cs: isCloserSpacing ? Double(closerSpacingLand) : nil,
+            measureType: selectedMeasureType == "Acres" ? 0 : 1
+        )
+
+        guard let token = SessionManager.shared.authToken else {
+            showToast = true
+            toastMessage = "Authentication token missing"
+            return
+        }
+
+        ApiService.shared.addLandExtended(token: token, request: landRequest) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let responseString):
+                    print("AddLandExtended Success: \(responseString)")
+                    
+                    // Ensure we have selected images/documents
+                    guard !selectedImages.isEmpty || !selectedDocuments.isEmpty else {
+                        showValidationAlert = true
+                        validationTitle = "Land Added!"
+                        validationMessage = "Land successfully added."
+                        return
+                    }
+                    
+                    // Convert images to FarmerDocsRequest objects
+                    var docsRequests: [FarmerDocsRequest] = []
+                    
+                    for image in selectedImages {
+                        if let imageData = image.jpegData(compressionQuality: 0.8) {
+                            let base64String = imageData.base64EncodedString()
+                            let docRequest = FarmerDocsRequest(
+                                farmerID: Decimal(landRequest.farmerId), // attach with farmerId
+                                typeID: 1, // TypeID for images
+                                proof: base64String,
+                                type: "Image"
+                            )
+                            docsRequests.append(docRequest)
+                        }
+                    }
+                    
+                    // Convert documents from URLs to Base64
+                    for docURL in selectedDocuments {
+                        if let data = try? Data(contentsOf: docURL) {
+                            let base64String = data.base64EncodedString()
+                            let docRequest = FarmerDocsRequest(
+                                farmerID: Decimal(landRequest.farmerId),
+                                typeID: 2, // TypeID for docs
+                                proof: base64String,
+                                type: "Document"
+                            )
+                            docsRequests.append(docRequest)
+                        }
+                    }
+                    
+                    // Upload all docs sequentially
+                    func uploadNext(index: Int) {
+                        guard index < docsRequests.count else {
+                            // All uploads completed
+                            showValidationAlert = true
+                            validationTitle = "Land Added!"
+                            validationMessage = "Land successfully added and documents uploaded."
+                            return
+                        }
+                        
+                        ApiService.shared.uploadFarmerDocs(token: token, request: docsRequests[index]) { result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success(_):
+                                    // Upload next document
+                                    uploadNext(index: index + 1)
+                                case .failure(let error):
+                                    showToast = true
+                                    toastMessage = "Document upload failed: \(error.localizedDescription)"
+                                }
+                            }
+                        }
+                    }
+                    
+                    uploadNext(index: 0)
+                    
+                case .failure(let error):
+                    showToast = true
+                    let nsError = error as NSError
+                    
+                    if let responseJson = nsError.userInfo["ResponseJSON"] as? String {
+                        if let jsonData = responseJson.data(using: .utf8),
+                           let jsonObject = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+                            
+                            if let errorMessage = jsonObject["message"] as? String {
+                                toastMessage = "Add Land failed: \(errorMessage)"
+                            } else if let errorMessage = jsonObject["error"] as? String {
+                                toastMessage = "Add Land failed: \(errorMessage)"
+                            } else if let errors = jsonObject["errors"] as? [String: Any] {
+                                if let firstError = errors.values.first as? [String],
+                                   let firstErrorMessage = firstError.first {
+                                    toastMessage = "Add Land failed: \(firstErrorMessage)"
+                                } else if let firstError = errors.values.first as? String {
+                                    toastMessage = "Add Land failed: \(firstError)"
+                                } else {
+                                    toastMessage = "Add Land failed: \(responseJson)"
+                                }
+                            } else {
+                                toastMessage = "Add Land failed: \(responseJson)"
+                            }
+                        } else {
+                            toastMessage = "Add Land failed: \(responseJson)"
+                        }
+                    } else {
+                        toastMessage = "Add Land failed: \(error.localizedDescription)"
                     }
                 }
             }

@@ -33,6 +33,10 @@ struct FarmerRegistrationResponse: Codable {
     let isActive: Bool?
     let expectedYeild: Double?
     let regRemarks: String?
+    let tc: Double?
+    let hd: Double?
+    let dc: Double?
+    let cs: Double?
     
     // Map JSON keys (CamelCase in Java → snakeCase in JSON → Swift properties)
     enum CodingKeys: String, CodingKey {
@@ -68,5 +72,9 @@ struct FarmerRegistrationResponse: Codable {
         case isActive = "IsActive"
         case expectedYeild = "expectedyeild"
         case regRemarks = "RegRemarks"
+        case tc = "tc"
+        case hd = "hd"
+        case dc = "dc"
+        case cs = "cs"
     }
 }

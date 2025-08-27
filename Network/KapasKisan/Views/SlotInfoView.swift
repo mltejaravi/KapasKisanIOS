@@ -1,41 +1,30 @@
-//
-//  SlotInfoView.swift
-//  KapasKisan
-//
-//  Created by Raviteja Mulukuntla on 15/08/25.
-//
-
-
 import SwiftUI
 
 struct SlotInfoView: View {
-    // Sample data - replace with your actual data model
-    let slotInfoItems = [
-        SlotInfo(date: "2023-05-15", time: "09:00 AM", status: "Confirmed", details: "Market: APMC1, Mill: Mill1"),
-        SlotInfo(date: "2023-05-16", time: "11:00 AM", status: "Pending", details: "Market: APMC2, Mill: Mill2"),
-        SlotInfo(date: "2023-05-17", time: "02:00 PM", status: "Completed", details: "Market: APMC3, Mill: Mill3")
-    ]
-    @State private var gotoHome:Bool = false
+    @State private var slotInfoItems: [SlotBookingInfo] = []
+    @State private var isLoading = true
+    @State private var gotoHome = false
+    
+    // For cancel popup
+    @State private var showCancelPopup = false
+    @State private var cancelReason = ""
+    @State private var selectedBookingNo: String? = nil
+    @State private var showSuccessPopup = false
     
     var body: some View {
         NavigationView {
             ZStack {
-                // Background color
                 Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all)
-                
+
                 VStack(spacing: 0) {
-                    // Status bar border
                     Rectangle()
                         .fill(Color.blue)
                         .frame(height: 2)
                         .edgesIgnoringSafeArea(.top)
-                    
-                    // Header with back button and title
+
                     HStack {
-                        NavigationLink(destination: HomeView(), isActive:$gotoHome){
-                            Button(action: {
-                                gotoHome = true
-                            }) {
+                        NavigationLink(destination: HomeView(), isActive: $gotoHome) {
+                            Button(action: { gotoHome = true }) {
                                 Image(systemName: "arrow.backward")
                                     .font(.system(size: 24))
                                     .foregroundColor(.black)
@@ -44,37 +33,48 @@ struct SlotInfoView: View {
                             }
                             .padding(.leading, 12)
                         }
-                        
+
                         Text("Slot Booking Information")
                             .font(.system(size: 25, weight: .bold))
                             .frame(maxWidth: .infinity)
                     }
                     .padding(.top, 16)
                     .padding(.bottom, 8)
-                    
-                    // Slot information list
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(slotInfoItems, id: \.id) { item in
-                                SlotInfoCard(item: item)
+
+                    if isLoading {
+                        ProgressView("Loading...")
+                            .padding(.top, 50)
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(slotInfoItems) { item in
+                                    SlotInfoCard(
+                                        item: item,
+                                        onCancel: {
+                                            selectedBookingNo = item.bookingNo
+                                            cancelReason = ""
+                                            showCancelPopup = true
+                                        }
+                                    )
+                                }
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 20)
+                            .padding(.bottom, 20)
                         }
+                        .background(Color.white)
+                        .cornerRadius(12)
                         .padding(.horizontal, 16)
-                        .padding(.top, 20)
-                        .padding(.bottom, 20)
+                        .padding(.top, 8)
                     }
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
+
+                    Spacer()
                 }
-                
-                // Go Back button (fixed at bottom)
+                .frame(maxHeight: .infinity, alignment: .top)
+
                 VStack {
                     Spacer()
-                    Button(action: {
-                        // Go back action
-                    }) {
+                    Button(action: { gotoHome = true }) {
                         Text("Go Back to Home")
                             .font(.system(size: 18, weight: .bold))
                             .frame(maxWidth: .infinity)
@@ -89,42 +89,106 @@ struct SlotInfoView: View {
                 }
             }
             .navigationBarHidden(true)
-            .navigationBarBackButtonHidden(true)
+            .onAppear {
+                fetchSlots()
+            }
+            // Cancel Reason Popup
+            .alert("Cancel Booking", isPresented: $showCancelPopup, actions: {
+                TextField("Enter reason", text: $cancelReason)
+                
+                Button("Confirm", action: {
+                    if let bookingNo = selectedBookingNo {
+                        cancelBooking(bookingNo: bookingNo, reason: cancelReason)
+                    }
+                })
+                
+                Button("Cancel", role: .cancel, action: {})
+            }, message: {
+                Text("Please enter a reason for cancellation.")
+            })
+            // Success Popup after cancellation
+            .alert("Booking Cancelled", isPresented: $showSuccessPopup, actions: {
+                Button("OK", action: {
+                    gotoHome = true
+                })
+            }, message: {
+                Text("Your booking has been cancelled successfully.")
+            })
         }
         .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
+    }
+    
+    private func fetchSlots() {
+        isLoading = true
+        
+        if let token = SessionManager.shared.authToken,
+           let farmerId = SessionManager.shared.farmerDetails?.pkFarmerID {
+            ApiService.shared.getSlotBookingInfoByFarmerId(token: token, farmerId: farmerId) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let slots):
+                        self.slotInfoItems = slots
+                    case .failure(let error):
+                        print("Error fetching slots: \(error.localizedDescription)")
+                    }
+                    self.isLoading = false
+                }
+            }
+        }
+    }
+    
+    private func cancelBooking(bookingNo: String, reason: String) {
+        guard let token = SessionManager.shared.authToken,
+              let userId = SessionManager.shared.farmerDetails?.pkFarmerID else { return }
+        
+        let request = CancelBookingRequest(
+            BOOKINGNO: bookingNo,
+            CANCELREMARKS: reason,
+            CANCELUSER: userId
+        )
+        
+        ApiService.shared.cancelBooking(token: token, request: request) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    fetchSlots() // Refresh after cancel
+                    showSuccessPopup = true
+                case .failure(let error):
+                    print("Cancel failed: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
 
-// Slot Information Card View
+// MARK: - Slot Information Card
 struct SlotInfoCard: View {
-    let item: SlotInfo
+    let item: SlotBookingInfo
+    let onCancel: () -> Void
     
     var statusColor: Color {
-        switch item.status {
-        case "Confirmed": return .green
-        case "Pending": return .orange
-        case "Completed": return .blue
-        default: return .gray
-        }
+        item.cancelled == "Not Cancelled" ? .green : .red
     }
     
     var body: some View {
         CardView(cornerRadius: 12, elevation: 4) {
             VStack(alignment: .leading, spacing: 12) {
+                
+                // Top Row (Day + Slot Time)
                 HStack {
-                    Text(item.date)
+                    Text("Day: \(item.dayID)/\(item.monthID)")
                         .font(.system(size: 18, weight: .bold))
                     
                     Spacer()
                     
-                    Text(item.time)
+                    Text(item.centerSlotTimeName)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.secondary)
                 }
                 
+                // Status + Cancel Info
                 HStack {
-                    Text(item.status)
+                    Text(item.cancelled == "Not Cancelled" ? "Confirmed" : "Cancelled")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 12)
@@ -133,28 +197,68 @@ struct SlotInfoCard: View {
                         .cornerRadius(12)
                     
                     Spacer()
+                    
+                    if let cancelledText = item.cancelled,
+                       !cancelledText.isEmpty,
+                       cancelledText != "Not Cancelled" {
+                        
+                        // Show the text from API (e.g. "Slot Cancelled On ...")
+                        Text(cancelledText)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.red.opacity(0.05))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.red.opacity(0.4), lineWidth: 1)
+                            )
+                        
+                    } else {
+                        // Show Cancel button
+                        Button(action: onCancel) {
+                            Text("Cancel")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.red)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.red.opacity(0.05))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.red.opacity(0.4), lineWidth: 1)
+                                )
+                        }
+                    }
                 }
                 
-                Text(item.details)
-                    .font(.system(size: 15))
-                    .foregroundColor(.secondary)
+                // Booking Info Block
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Booking No: \(item.bookingNo)")
+                        .font(.system(size: 15))
+                    
+                    Text("Market: \(item.marketName), Mill: \(item.ginningMillName)")
+                        .font(.system(size: 15))
+                        .foregroundColor(.secondary)
+                    
+                    if let wgt = item.approxWgt {
+                        Text("Approx Wt: \(wgt, specifier: "%.2f") Quintals")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(10)
+                .background(Color.gray.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
             }
             .padding(16)
+            // 🔹 Outer border for each card
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
         }
-    }
-}
-
-// Data Model
-struct SlotInfo: Identifiable {
-    let id = UUID()
-    let date: String
-    let time: String
-    let status: String
-    let details: String
-}
-
-struct SlotInfoView_Previews: PreviewProvider {
-    static var previews: some View {
-        SlotInfoView()
     }
 }

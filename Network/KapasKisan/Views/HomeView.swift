@@ -174,7 +174,7 @@ struct HomeView: View {
                             DispatchQueue.main.async {
                                 if let first = farmerDetails.first{
                                     SessionManager.shared.farmerDetails = first
-                                    regStatus = "Farmer is registered"
+                                    regStatus = "Farmer is already registered with barcode: \(barcode)"
                                     regRemarks = first.regRemarks ?? ""
                                 }
                             }

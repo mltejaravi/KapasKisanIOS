@@ -354,48 +354,324 @@ class ApiService: NSObject {
     
     // MARK: - Upload farmer docs
     func uploadFarmerDocs(token: String, request: FarmerDocsRequest, completion: @escaping (Result<String, Error>) -> Void) {
-            guard let url = URL(string: baseURL + "farmerdocs") else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
-                return
+        guard let url = URL(string: baseURL + "farmerdocs") else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid URL"])))
+            return
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("Request JSON: \(jsonString)")
             }
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.httpMethod = "POST"
-            urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            
-            do {
-                let jsonData = try JSONEncoder().encode(request)
-                urlRequest.httpBody = jsonData
-                
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    print("Request JSON: \(jsonString)")
-                }
-            } catch {
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        session.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
                 completion(.failure(error))
                 return
             }
             
-            session.dataTask(with: urlRequest) { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let data = data else {
-                    completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey : "No Data Received"])))
-                    return
-                }
-                
-                // Optionally, parse a response
-                if let responseString = String(data: data, encoding: .utf8) {
-                    completion(.success(responseString))
-                } else {
-                    completion(.failure(NSError(domain: "", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
-                }
-                
-            }.resume()
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey : "No Data Received"])))
+                return
+            }
+            
+            // Optionally, parse a response
+            if let responseString = String(data: data, encoding: .utf8) {
+                completion(.success(responseString))
+            } else {
+                completion(.failure(NSError(domain: "", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
+            }
+            
+        }.resume()
+    }
+    
+    // MARK: - Add Land
+    func addLandExtended(
+            token: String,
+            request: AddLandExtendedRequest,
+            completion: @escaping (Result<String, Error>) -> Void
+        ) {
+        guard let url = URL(string: baseURL + "api/AddLandExtended") else {
+            completion(.failure(NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]
+            )))
+            return
         }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("AddLandExtended Request JSON: \(jsonString)")
+            }
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        session.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "No Data Received"]
+                )))
+                return
+            }
+            
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("AddLandExtended Response JSON: \(responseString)")
+                completion(.success(responseString))
+            } else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -3,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid response"]
+                )))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Create Booking
+    func createBooking(
+        token: String,
+        request: SlotBookingRequest,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "Booking") else {
+            completion(.failure(NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]
+            )))
+            return
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("CreateBooking Request JSON: \(jsonString)")
+            }
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        session.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "No Data Received"]
+                )))
+                return
+            }
+            
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("CreateBooking Response JSON: \(responseString)")
+                completion(.success(responseString))
+            } else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -3,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid response"]
+                )))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Get Available Slots
+    func getAvailableSlots(
+        token: String,
+        centerId: Int,
+        monthId: Int,
+        dayId: Int,
+        completion: @escaping (Result<[Slot], Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "api/AvailableSlots/\(centerId)/\(monthId)/\(dayId)") else {
+            completion(.failure(NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey : "Invalid URL"]
+            )))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        session.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey : "No Data Received"]
+                )))
+                return
+            }
+            
+            do {
+                let slots = try JSONDecoder().decode([Slot].self, from: data)
+                completion(.success(slots))
+            } catch {
+                // debugging help: print raw response if decoding fails
+                if let rawString = String(data: data, encoding: .utf8) {
+                    print("Decoding error. Raw response: \(rawString)")
+                }
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Get Slot Booking Info By FarmerId
+    func getSlotBookingInfoByFarmerId(
+        token: String,
+        farmerId: Int,
+        completion: @escaping (Result<[SlotBookingInfo], Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "api/SlotBookingInfo/\(farmerId)") else {
+            completion(.failure(NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]
+            )))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        session.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "No Data Received"]
+                )))
+                return
+            }
+            
+            do {
+                let bookings = try JSONDecoder().decode([SlotBookingInfo].self, from: data)
+                completion(.success(bookings))
+            } catch {
+                if let raw = String(data: data, encoding: .utf8) {
+                    print("Decoding error. Raw response: \(raw)")
+                }
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Cancel Booking
+    func cancelBooking(
+        token: String,
+        request: CancelBookingRequest,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + "Booking/Cancel") else {
+            completion(.failure(NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]
+            )))
+            return
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+            
+            // Debug print
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("CancelBooking Request JSON: \(jsonString)")
+            }
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        session.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "No Data Received"]
+                )))
+                return
+            }
+            
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("CancelBooking Response JSON: \(responseString)")
+                completion(.success(responseString))
+            } else {
+                completion(.failure(NSError(
+                    domain: "",
+                    code: -3,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid response"]
+                )))
+            }
+        }.resume()
+    }
 }
 
 // MARK: - Allow Self-Signed SSL Certificates (DEV ONLY)
