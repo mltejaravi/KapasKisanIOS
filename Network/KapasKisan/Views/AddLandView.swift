@@ -502,6 +502,7 @@ struct AddLandView: View {
         .onAppear{
             loadStates()
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }

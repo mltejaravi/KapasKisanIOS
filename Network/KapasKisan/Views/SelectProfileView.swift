@@ -44,6 +44,7 @@ struct SelectProfileView: View {
                 )
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .onAppear(perform: onAppearAction)
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)

@@ -115,6 +115,7 @@ struct SlotInfoView: View {
                 Text("Your booking has been cancelled successfully.")
             })
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
     }
     
@@ -260,5 +261,11 @@ struct SlotInfoCard: View {
                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
             )
         }
+    }
+}
+
+struct SlotInfoView_Previews: PreviewProvider {
+    static var previews: some View {
+        SlotInfoView()
     }
 }

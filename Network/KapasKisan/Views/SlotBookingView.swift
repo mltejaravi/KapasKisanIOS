@@ -383,6 +383,7 @@ struct SlotBookingView: View {
                 }
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
         .onAppear{

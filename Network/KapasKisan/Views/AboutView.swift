@@ -94,6 +94,7 @@ struct AboutView: View {
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
