@@ -140,6 +140,19 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: titles) { _ in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let salutationId = farmer.pkSalutationID,
+                                           let salutationName = farmer.salutationName {
+
+                                            if let match = titles.first(where: {
+                                                $0.id == Int(salutationId) &&
+                                                $0.name.caseInsensitiveCompare(salutationName) == .orderedSame
+                                            }) {
+                                                selectedTitle = match
+                                            }
+                                        }
+                                    }
                                     
                                     // Farmer Name
                                     TextField("Farmer Name", text: $farmerName)
@@ -169,6 +182,12 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: genders) { newGenders in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let genderName = farmer.genderName {
+                                            selectedGender = newGenders.first { $0.name == genderName }
+                                        }
+                                    }
                                     
                                     // Date of Birth
                                     Button(action: {
@@ -216,6 +235,12 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: categories) { newCategories in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let casteName = farmer.casteName {
+                                            selectedCategory = newCategories.first { $0.name == casteName }
+                                        }
+                                    }
                                     
                                     // Aadhar Number
                                     TextField("Aadhar Number", text: $aadharNumber)
@@ -276,6 +301,12 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: states) { newStates in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let stateName = farmer.stateName {
+                                            selectedState = newStates.first { $0.name == stateName }
+                                        }
+                                    }
                                     .onChange(of: selectedState) { newValue in
                                         mandals = []
                                         villages = []
@@ -313,6 +344,12 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: districts) { newDistricts in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let districtName = farmer.districtName {
+                                            selectedDistrict = newDistricts.first { $0.name == districtName }
+                                        }
+                                    }
                                     .onChange(of: selectedDistrict) { newValue in
                                         villages = []
                                         
@@ -350,6 +387,12 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: mandals) { newMandals in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let mandalName = farmer.mandalName {
+                                            selectedMandal = newMandals.first { $0.name == mandalName }
+                                        }
+                                    }
                                     .onChange(of: selectedMandal) { newValue in
                                         if let mandal = newValue {
                                             if mandal.id != 0 {
@@ -382,6 +425,13 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: villages) { newVillages in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let villageName = farmer.villageName {
+                                            selectedVillage = newVillages.first { $0.name == villageName }
+                                        }
+                                    }
+
                                     
                                     // Market selection
                                     Text("Select Market")
@@ -403,6 +453,12 @@ struct RegistrationView: View {
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
+                                    .onChange(of: markets) { newMarkets in
+                                        if let farmer = SessionManager.shared.farmerDetails,
+                                           let marketName = farmer.marketName {
+                                            selectedMarket = newMarkets.first { $0.name == marketName }
+                                        }
+                                    }
                                     
                                     // Farmer Type selection
                                     Text("Select Farmer Type")
@@ -698,8 +754,8 @@ struct RegistrationView: View {
                             .frame(height: 60)
                             .background(
                                 (SessionManager.shared.barCode ?? "").isEmpty
-                                    ? Color.blue   // when empty → active
-                                    : Color.gray   // when not empty → greyed out
+                                ? Color.blue   // when empty → active
+                                : Color.gray   // when not empty → greyed out
                             )
                             .foregroundColor(.white)
                             .cornerRadius(8)
@@ -739,13 +795,53 @@ struct RegistrationView: View {
             )
         }
         .onAppear {
-            mobileNumber = SessionManager.shared.mobileNumber ?? ""
-            
             loadTitles()
             loadGenders()
             loadCategories()
             loadStates()
             loadFarmerTypes()
+            
+            mobileNumber = SessionManager.shared.mobileNumber ?? ""
+            
+            if let barcode = SessionManager.shared.barCode,
+               let farmer = SessionManager.shared.farmerDetails{
+                if(!barcode.isEmpty){
+                    // Text fields
+                    registrationNumber = barcode
+                    if let fullname =  farmer.farmerFullname,
+                       let faddress = farmer.fAddress,
+                       let mobileNo = farmer.mobileNo,
+                       let aadharNo = farmer.aadharNo,
+                       let fdob = farmer.dob,
+                       let fName = farmer.fname,
+                       let fpassBookNo = farmer.passBookNo,
+                       let ftotalland = farmer.totalLand,
+                       let fcottonland = farmer.noOfAcr,
+                       let ftc = farmer.tc,
+                       let fhd = farmer.hd,
+                       let fdc = farmer.dc,
+                       let fcs = farmer.cs
+                    {
+                        farmerName = fullname
+                        address = faddress
+                        mobileNumber = mobileNo
+                        aadharNumber = aadharNo
+                        let formatter = DateFormatter()
+                        formatter.dateFormat = "yyyy-MM-dd" // match the format of fdob
+                        if let parsedDate = formatter.date(from: fdob) {
+                            dob = parsedDate
+                        }
+                        fatherName = fName
+                        passbookNumber = fpassBookNo
+                        totalLand = String(ftotalland)
+                        cottonLand = String(fcottonland)
+                        traditionalLand = String(ftc)
+                        desiCottonLand = String(fdc)
+                        hdpsLand = String(fhd)
+                        closerSpacingLand = String(fcs)
+                    }
+                }
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
