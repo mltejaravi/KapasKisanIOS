@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showValidationAlert = false
     @State private var validationMessage = ""
     @State private var validationTitle = ""
+    @State private var barCode: String = ""
     
     var body: some View {
         NavigationView {
@@ -43,18 +44,25 @@ struct HomeView: View {
                                 MenuCard(iconName: "person.crop.circle",
                                          buttonText: "Change Profile",
                                          buttonColor: .blue,
-                                         destination: SelectProfileView(),
+                                         destination: SelectProfileView()
+                                    .onAppear{
+                                        SessionManager.shared.barCode = nil
+                                        SessionManager.shared.farmerDetails = nil
+                                        SessionManager.shared.isRegistered = false
+                                    },
                                          showValidationAlert: .constant(false),
                                          validationTitle: .constant(""),
                                          validationMessage: .constant(""))
                                 
-                                MenuCard(iconName: "person.badge.plus",
-                                         buttonText: "Register Now",
-                                         buttonColor: .green,
-                                         destination: RegistrationView(),
-                                         showValidationAlert: .constant(false),
-                                         validationTitle: .constant(""),
-                                         validationMessage: .constant(""))
+                                MenuCard(
+                                    iconName: "person.badge.plus",
+                                    buttonText: barCode.isEmpty ? "Register Now" : "Show Registered Details",
+                                    buttonColor: .green,
+                                    destination: RegistrationView(),
+                                    showValidationAlert: .constant(false),
+                                    validationTitle: .constant(""),
+                                    validationMessage: .constant("")
+                                )
                                 
                                 MenuCard(iconName: "calendar.badge.clock",
                                          buttonText: "Book a Slot",
@@ -178,6 +186,7 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            barCode = SessionManager.shared.barCode ?? ""
             if let token = SessionManager.shared.authToken,
                let barcode = SessionManager.shared.barCode {
                 if barcode != "" && barcode != "Select BarCode" {
