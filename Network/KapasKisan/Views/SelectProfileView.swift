@@ -241,12 +241,8 @@ extension SelectProfileView {
                         if barcodesResult.count > 1 {
                             SessionManager.shared.isRegistered = true
                             self.barcodes = barcodesResult.map { $0.barCode }
-                        } else if let onlyBarcode = barcodesResult.first?.barCode {
-                            SessionManager.shared.isRegistered = true
-                            self.selectedBarcode = onlyBarcode
-                            SessionManager.shared.barCode = onlyBarcode
-                            self.navigateToHome = true
-                        } else {
+                        }
+                        else {
                             SessionManager.shared.isRegistered = false
                             self.navigateToHome = true
                         }
