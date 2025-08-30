@@ -117,6 +117,7 @@ struct SlotInfoView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
+        .preferredColorScheme(.light)
     }
     
     private func fetchSlots() {

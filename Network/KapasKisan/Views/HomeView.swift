@@ -211,6 +211,7 @@ struct HomeView: View {
                 print("⚠️ Missing token or barcode")
             }
         }
+        .preferredColorScheme(.light)
     }
 }
 

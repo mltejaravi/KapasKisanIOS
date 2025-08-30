@@ -845,6 +845,7 @@ struct RegistrationView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
+        .preferredColorScheme(.light)
     }
     
     // MARK: - Fetching Unique Names

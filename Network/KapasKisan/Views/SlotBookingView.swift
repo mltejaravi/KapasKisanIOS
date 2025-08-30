@@ -390,6 +390,7 @@ struct SlotBookingView: View {
             loadStates()
             expectedYeild = "\(SessionManager.shared.farmerDetails?.expectedYeild ?? 0)"
         }
+        .preferredColorScheme(.light)
     }
     
     // MARK: - States

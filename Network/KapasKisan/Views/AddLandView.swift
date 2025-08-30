@@ -505,6 +505,7 @@ struct AddLandView: View {
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .preferredColorScheme(.light)
     }
     
     

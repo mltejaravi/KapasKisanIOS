@@ -50,6 +50,7 @@ struct SelectProfileView: View {
         .navigationBarBackButtonHidden(true)
         .background(NavigationLink("", destination: HomeView(), isActive: $navigateToHome).hidden())
         .background(NavigationLink("", destination: LoginView(), isActive: $navigateToLogin).hidden())
+        .preferredColorScheme(.light)
     }
 }
 
