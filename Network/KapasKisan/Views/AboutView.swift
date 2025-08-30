@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AboutView: View {
-    @State private var gotoHome:Bool = false
+    @State private var gotoHome: Bool = false
     
     var body: some View {
         NavigationView {
@@ -11,26 +11,30 @@ struct AboutView: View {
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Back button - will be hidden by navigation bar
+                        
+                        // Back button row
                         HStack {
-                            NavigationLink(destination: HomeView(), isActive:$gotoHome){
-                                Button(action: {
-                                    gotoHome = true
-                                }) {
-                                    Image(systemName: "arrow.backward")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(.black)
-                                        .frame(width: 60, height: 60)
-                                        .contentShape(Rectangle())
-                                }
-                                .padding(.leading, 12)
+                            Button(action: { gotoHome = true }) {
+                                Image(systemName: "arrow.backward")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.black)
+                                    .frame(width: 60, height: 60)
+                                    .contentShape(Rectangle())
                             }
+                            .padding(.leading, 12)
+                            
                             Spacer()
                         }
                         .padding(.top, 12)
                         
-                        // Main content card
+                        // Programmatic navigation link
+                        NavigationLink(destination: HomeView(), isActive: $gotoHome) {
+                            EmptyView()
+                        }
+                        
+                        // Main content
                         VStack(spacing: 16) {
+                            
                             // Main info card
                             CardView {
                                 VStack(spacing: 12) {
@@ -50,8 +54,12 @@ struct AboutView: View {
                                         .padding(.horizontal, 8)
                                     
                                     // Logo card
-                                    CardView(cornerRadius: 16, elevation: 6, backgroundColor: Color(red: 247/255, green: 242/255, blue: 231/255)) {
-                                        Image("kapaskisanlogo_round") // Make sure to add this image to your assets
+                                    CardView(cornerRadius: 16,
+                                             elevation: 6,
+                                             backgroundColor: Color(red: 247/255,
+                                                                    green: 242/255,
+                                                                    blue: 231/255)) {
+                                        Image("kapaskisanlogo_round") // Make sure asset exists + target membership enabled
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 100, height: 100)
@@ -95,9 +103,7 @@ struct AboutView: View {
             .navigationBarBackButtonHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
-        .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
-        preferredColorScheme(.light)
+        .preferredColorScheme(.light)
     }
 }
 
@@ -108,7 +114,10 @@ struct CardView<Content: View>: View {
     var backgroundColor: Color = .white
     let content: Content
     
-    init(cornerRadius: CGFloat = 16, elevation: CGFloat = 8, backgroundColor: Color = .white, @ViewBuilder content: () -> Content) {
+    init(cornerRadius: CGFloat = 16,
+         elevation: CGFloat = 8,
+         backgroundColor: Color = .white,
+         @ViewBuilder content: () -> Content) {
         self.cornerRadius = cornerRadius
         self.elevation = elevation
         self.backgroundColor = backgroundColor
@@ -117,10 +126,14 @@ struct CardView<Content: View>: View {
     
     var body: some View {
         content
+            .padding() // ensures spacing inside
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(backgroundColor)
-                    .shadow(radius: elevation)
+                    .shadow(color: .black.opacity(0.2),
+                            radius: elevation,
+                            x: 0,
+                            y: 2)
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
