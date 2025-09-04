@@ -1,4 +1,5 @@
 import SwiftUI
+import AppTrackingTransparency
 
 struct SelectProfileView: View {
     @State private var selectedBarcode: String = "Select BarCode"
@@ -7,6 +8,10 @@ struct SelectProfileView: View {
     @State private var isUserLoggedIn: Bool = false
     @State private var navigateToLogin:Bool = false
     @State private var navigateToHome:Bool = false
+    
+    // ✅ For ATT flow
+    @State private var navigateToRegistration: Bool = false
+    @State private var showATTAlert: Bool = false
     
     var body: some View {
         NavigationView {
@@ -24,7 +29,13 @@ struct SelectProfileView: View {
                                 barcodes: $barcodes,
                                 navigateToHome: $navigateToHome
                             )
-                            RegisterNowCard()
+                            
+                            // ✅ Pass ATT checker down
+                            RegisterNowCard(
+                                navigateToRegistration: $navigateToRegistration,
+                                checkATTBeforeFeatureAccess: checkATTBeforeFeatureAccess
+                            )
+                            
                             LogoutCard(navigateToLogin: $navigateToLogin)
                             BottomLogo()
                         }
@@ -43,6 +54,18 @@ struct SelectProfileView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
+            .alert(isPresented: $showATTAlert) {
+                Alert(
+                    title: Text("Permission Required"),
+                    message: Text("Please allow App Tracking Transparency in Settings to proceed."),
+                    primaryButton: .default(Text("Open Settings")) {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    },
+                    secondaryButton: .cancel(Text("Not Now"))
+                )
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear(perform: onAppearAction)
@@ -50,7 +73,32 @@ struct SelectProfileView: View {
         .navigationBarBackButtonHidden(true)
         .background(NavigationLink("", destination: HomeView(), isActive: $navigateToHome).hidden())
         .background(NavigationLink("", destination: LoginView(), isActive: $navigateToLogin).hidden())
+        .background(NavigationLink("", destination: RegistrationView(), isActive: $navigateToRegistration).hidden())
         .preferredColorScheme(.light)
+    }
+    
+    // 🔑 Shared ATT checker
+    private func checkATTBeforeFeatureAccess(onAuthorized: @escaping () -> Void) {
+        let status = ATTrackingManager.trackingAuthorizationStatus
+        
+        switch status {
+        case .authorized:
+            onAuthorized()
+        case .notDetermined:
+            ATTrackingManager.requestTrackingAuthorization { newStatus in
+                DispatchQueue.main.async {
+                    if newStatus == .authorized {
+                        onAuthorized()
+                    } else {
+                        showATTAlert = true
+                    }
+                }
+            }
+        case .denied, .restricted:
+            showATTAlert = true
+        @unknown default:
+            showATTAlert = true
+        }
     }
 }
 
@@ -75,51 +123,52 @@ private struct BarcodeSelection: View {
     @Binding var selectedBarcode: String
     @Binding var barcodes: [String]
     @Binding var navigateToHome: Bool
-    @State private var showError: Bool = false   // ✅ to control error label
+    @State private var showError: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Select BarCode")
-                .font(.system(size: 14))
-                .foregroundColor(.black)
-            
-            HStack {
-                Picker("Select BarCode", selection: $selectedBarcode) {
-                    ForEach(barcodes, id: \.self) { barcode in
-                        Text(barcode).tag(barcode)
-                    }
-                }
-                .pickerStyle(MenuPickerStyle())
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.white)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray, lineWidth: 1)
-                )
+            if !barcodes.isEmpty {
+                Text("Select BarCode")
+                    .font(.system(size: 14))
+                    .foregroundColor(.black)
                 
-                Button(action: {
-                    if selectedBarcode == "Select BarCode" {
-                        showError = true   // ✅ show error label
-                    } else {
-                        SessionManager.shared.barCode = selectedBarcode
-                        navigateToHome = true
-                        showError = false   // ✅ hide error if valid
+                HStack {
+                    Picker("Select BarCode", selection: $selectedBarcode) {
+                        ForEach(barcodes, id: \.self) { barcode in
+                            Text(barcode).tag(barcode)
+                        }
                     }
-                }) {
-                    Image(systemName: "arrow.forward")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .padding(12)
-                        .foregroundColor(.white)
-                        .background(Color.teal)
-                        .cornerRadius(24)
+                    .pickerStyle(MenuPickerStyle())
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray, lineWidth: 1)
+                    )
+                    
+                    Button(action: {
+                        if selectedBarcode == "Select BarCode" {
+                            showError = true
+                        } else {
+                            SessionManager.shared.barCode = selectedBarcode
+                            navigateToHome = true
+                            showError = false
+                        }
+                    }) {
+                        Image(systemName: "arrow.forward")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .padding(12)
+                            .foregroundColor(.white)
+                            .background(Color.teal)
+                            .cornerRadius(24)
+                    }
+                    .frame(width: 48, height: 48)
                 }
-                .frame(width: 48, height: 48)
             }
             
-            // ✅ Error shown only after button tap & invalid selection
             if showError {
                 Text("⚠️ Please select a barcode")
                     .font(.system(size: 12))
@@ -132,6 +181,9 @@ private struct BarcodeSelection: View {
 
 // MARK: - Register Now Card
 private struct RegisterNowCard: View {
+    @Binding var navigateToRegistration: Bool
+    var checkATTBeforeFeatureAccess: (@escaping () -> Void) -> Void
+    
     var body: some View {
         CardView(cornerRadius: 12, elevation: 4) {
             HStack {
@@ -144,8 +196,11 @@ private struct RegisterNowCard: View {
                     .cornerRadius(12)
                     .padding(.trailing, 12)
                 
-                // NavigationLink instead of Button
-                NavigationLink(destination: RegistrationView()) {
+                Button(action: {
+                    //checkATTBeforeFeatureAccess {
+                        navigateToRegistration = true
+                    //}
+                }) {
                     Text("Register Now")
                         .font(.system(size: 16))
                         .frame(maxWidth: .infinity)

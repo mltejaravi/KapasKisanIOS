@@ -2,20 +2,28 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleName</key>
-	<string>Kapas Kisan</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>Privacy - Camera Usage Description
+</key>
+	<string>This app requires camera access to take photos.
+This app requires camera access to take photos.
+This app requires camera access to take photos.
+This app requires camera access to take photos.
+This app requires camera access to take photos.
+This app requires camera access to take photos.
+This app requires camera access to take photos.
+</string>
+	<key>Privacy - Photo Library Additions Usage Description
+</key>
+	<string>This app requires permission to save photos.
+</string>
+	<key>Privacy - Photo Library Usage Description
+</key>
+	<string>This app requires access to your photo library.
+</string>
 </dict>
 </plist>

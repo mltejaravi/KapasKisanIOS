@@ -54,6 +54,8 @@ struct AddLandView: View {
     @State private var showToast = false
     @State private var toastMessage = ""
     
+    @State private var isSubmitting = false
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -274,34 +276,90 @@ struct AddLandView: View {
                                         
                                         TextField("Passbook No / Khatha No", text: $passbookNumber)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     
                                     if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
                                         TextField(name, text: $text1)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
                                         TextField(name, text: $text2)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
                                         TextField(name, text: $text3)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
                                         TextField(name, text: $text4)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     
                                     // Total Land
                                     TextField("Total Land", text: $totalLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Cotton Land
                                     TextField("Cotton Land", text: $cottonLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     Text("Select Crop Type")
                                         .font(.headline)
@@ -320,6 +378,14 @@ struct AddLandView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
 
                                     // HDPS
@@ -335,6 +401,14 @@ struct AddLandView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
 
                                     // Desi Cotton
@@ -350,6 +424,14 @@ struct AddLandView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
 
                                     // Closer Spacing
@@ -365,6 +447,14 @@ struct AddLandView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                 }
                                 
@@ -451,6 +541,7 @@ struct AddLandView: View {
                     Spacer()
                     Button(action: {
                         if validateForm() {
+                            isSubmitting = true
                             AddLand()
                         } else {
                             showValidationAlert = true
@@ -465,6 +556,7 @@ struct AddLandView: View {
                             .cornerRadius(8)
                             .shadow(radius: 4)
                     }
+                    .disabled(isSubmitting)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                     .alert(isPresented: $showValidationAlert) {
@@ -474,6 +566,7 @@ struct AddLandView: View {
                                 title: Text(validationTitle),
                                 message: Text(validationMessage),
                                 dismissButton: .default(Text("OK")) {
+                                    isSubmitting = false
                                     // This triggers navigation
                                     gotoHome = true
                                 }
@@ -482,7 +575,9 @@ struct AddLandView: View {
                             return Alert(
                                 title: Text(validationTitle),
                                 message: Text(validationMessage),
-                                dismissButton: .default(Text("OK"))
+                                dismissButton: .default(Text("OK")) {
+                                    isSubmitting = false // ✅ Reset after failure
+                                }
                             )
                         }
                     }

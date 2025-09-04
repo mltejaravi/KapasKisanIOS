@@ -75,6 +75,8 @@ struct RegistrationView: View {
     @State private var validationMessage = ""
     @State private var validationTitle = ""
     
+    @State private var isSubmitting = false
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -119,6 +121,14 @@ struct RegistrationView: View {
                                     TextField("Registration Number", text: $registrationNumber)
                                         .disabled(true)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Title selection
                                     Text("Select Title")
@@ -144,7 +154,7 @@ struct RegistrationView: View {
                                         if let farmer = SessionManager.shared.farmerDetails,
                                            let salutationId = farmer.pkSalutationID,
                                            let salutationName = farmer.salutationName {
-
+                                            
                                             if let match = titles.first(where: {
                                                 $0.id == Int(salutationId) &&
                                                 $0.name.caseInsensitiveCompare(salutationName) == .orderedSame
@@ -157,10 +167,26 @@ struct RegistrationView: View {
                                     // Farmer Name
                                     TextField("Farmer Name", text: $farmerName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Father's Name
                                     TextField("Father's Name", text: $fatherName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Gender selection
                                     Text("Select Gender")
@@ -254,6 +280,14 @@ struct RegistrationView: View {
                                                 aadharNumber = filtered
                                             }
                                         }
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Mobile Number
                                     TextField("Mobile Number", text: $mobileNumber)
@@ -268,18 +302,35 @@ struct RegistrationView: View {
                                                 mobileNumber = filtered
                                             }
                                         }
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                 }
                                 
                                 Group {
                                     // Address
                                     TextField("Address", text: $address)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Land Details Section
                                     Text("Land Details")
                                         .font(.system(size: 14, weight: .bold))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .padding(.top, 8)
+                                    
                                     
                                     // State selection
                                     Text("Select State")
@@ -431,7 +482,7 @@ struct RegistrationView: View {
                                             selectedVillage = newVillages.first { $0.name == villageName }
                                         }
                                     }
-
+                                    
                                     
                                     // Market selection
                                     Text("Select Market")
@@ -531,11 +582,27 @@ struct RegistrationView: View {
                                     TextField("Total Land", text: $totalLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     // Cotton Land
                                     TextField("Cotton Land", text: $cottonLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                     
                                     Text("Select Crop Type")
                                         .font(.headline)
@@ -554,6 +621,14 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     
                                     // HDPS
@@ -569,6 +644,14 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     
                                     // Desi Cotton
@@ -584,6 +667,14 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                     
                                     // Closer Spacing
@@ -599,6 +690,14 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
+                                            .toolbar {
+                                                    ToolbarItemGroup(placement: .keyboard) {
+                                                        Spacer()
+                                                        Button("⌄") {
+                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                        }
+                                                    }
+                                                }
                                     }
                                 }
                                 
@@ -743,6 +842,7 @@ struct RegistrationView: View {
                     Spacer()
                     Button(action: {
                         if validateForm() {
+                            isSubmitting = true
                             submitRegistration()
                         } else {
                             showValidationAlert = true
@@ -761,7 +861,7 @@ struct RegistrationView: View {
                             .cornerRadius(8)
                             .shadow(radius: 4)
                     }
-                    .disabled(!(SessionManager.shared.barCode ?? "").isEmpty)
+                    .disabled(isSubmitting || !(SessionManager.shared.barCode ?? "").isEmpty)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                     .alert(isPresented: $showValidationAlert) {
@@ -770,6 +870,7 @@ struct RegistrationView: View {
                                 title: Text(validationTitle),
                                 message: Text(validationMessage),
                                 dismissButton: .default(Text("OK")) {
+                                    isSubmitting = false
                                     // This triggers navigation
                                     gotoHome = true
                                 }
@@ -778,7 +879,9 @@ struct RegistrationView: View {
                             return Alert(
                                 title: Text(validationTitle),
                                 message: Text(validationMessage),
-                                dismissButton: .default(Text("OK"))
+                                dismissButton: .default(Text("OK")) {
+                                    isSubmitting = false // ✅ Reset after failure
+                                }
                             )
                         }
                     }
@@ -793,6 +896,8 @@ struct RegistrationView: View {
                     EmptyView()
                 }
             )
+            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
         }
         .onAppear {
             loadTitles()
@@ -845,6 +950,7 @@ struct RegistrationView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
         .preferredColorScheme(.light)
     }
     
@@ -1415,7 +1521,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImages: [UIImage]
     @Binding var showToast: Bool
     @Binding var toastMessage: String
-    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.presentationMode) var presentationMode
     
     var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
@@ -1423,10 +1529,22 @@ struct ImagePicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
         
+        // Check if the sourceType is available
         if UIImagePickerController.isSourceTypeAvailable(sourceType) {
             picker.sourceType = sourceType
         } else {
+            // Fallback to photo library if camera is not available
             picker.sourceType = .photoLibrary
+            DispatchQueue.main.async {
+                self.showToast = true
+                self.toastMessage = "Camera is not available on this device"
+            }
+        }
+        
+        // For iPad, set popover style for photo library
+        if UIDevice.current.userInterfaceIdiom == .pad && picker.sourceType == .photoLibrary {
+            picker.modalPresentationStyle = .popover
+            picker.popoverPresentationController?.sourceView = UIView()
         }
         
         picker.allowsEditing = false
@@ -1449,43 +1567,44 @@ struct ImagePicker: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             
-            guard parent.selectedImages.count < 2 else {
-                parent.showToast = true
-                parent.toastMessage = "You can only select up to 2 images."
-                parent.presentationMode.wrappedValue.dismiss()
-                return
-            }
-            
-            if let image = info[.originalImage] as? UIImage {
-                
-                if picker.sourceType == .photoLibrary {
-                    // ✅ Restrict to 1 MB only for Gallery images
-                    var compression: CGFloat = 1.0
-                    var imageData = image.jpegData(compressionQuality: compression)
-                    
-                    while let data = imageData, data.count > 1_048_576 && compression > 0.1 {
-                        compression -= 0.1
-                        imageData = image.jpegData(compressionQuality: compression)
-                    }
-                    
-                    if let finalData = imageData, finalData.count <= 1_048_576,
-                       let finalImage = UIImage(data: finalData) {
-                        parent.selectedImages.append(finalImage)
-                    } else {
-                        parent.showToast = true
-                        parent.toastMessage = "Please select an image smaller than 1 MB."
-                    }
-                } else {
-                    // ✅ Camera images → no restriction
-                    parent.selectedImages.append(image)
+            DispatchQueue.main.async {
+                guard self.parent.selectedImages.count < 2 else {
+                    self.parent.showToast = true
+                    self.parent.toastMessage = "You can only select up to 2 images."
+                    self.parent.presentationMode.wrappedValue.dismiss()
+                    return
                 }
+                
+                if let image = info[.originalImage] as? UIImage {
+                    if picker.sourceType == .photoLibrary {
+                        // Compress image under 1 MB
+                        var compression: CGFloat = 1.0
+                        var imageData = image.jpegData(compressionQuality: compression)
+                        
+                        while let data = imageData, data.count > 1_048_576 && compression > 0.1 {
+                            compression -= 0.1
+                            imageData = image.jpegData(compressionQuality: compression)
+                        }
+                        
+                        if let finalData = imageData, let finalImage = UIImage(data: finalData) {
+                            self.parent.selectedImages.append(finalImage)
+                        } else {
+                            self.parent.showToast = true
+                            self.parent.toastMessage = "Please select an image smaller than 1 MB."
+                        }
+                    } else {
+                        // Camera images → no restriction
+                        self.parent.selectedImages.append(image)
+                    }
+                }
+                self.parent.presentationMode.wrappedValue.dismiss()
             }
-            
-            parent.presentationMode.wrappedValue.dismiss()
         }
         
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.presentationMode.wrappedValue.dismiss()
+            DispatchQueue.main.async {
+                self.parent.presentationMode.wrappedValue.dismiss()
+            }
         }
     }
 }

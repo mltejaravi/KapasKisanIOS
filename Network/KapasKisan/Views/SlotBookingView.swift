@@ -29,6 +29,8 @@ struct SlotBookingView: View {
     @State private var showToast = false
     @State private var toastMessage = ""
     
+    @State private var isSubmitting = false
+    
     // Sample data
     let availableSlots = ["9:00 AM", "11:00 AM", "2:00 PM", "4:00 PM"]
     @State private var gotoHome:Bool = false
@@ -204,6 +206,14 @@ struct SlotBookingView: View {
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .frame(width: 150, height: 48)
                                         .disabled(true)
+                                        .toolbar {
+                                                ToolbarItemGroup(placement: .keyboard) {
+                                                    Spacer()
+                                                    Button("⌄") {
+                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                    }
+                                                }
+                                            }
                                 }
                                 
                                 // Approximate weight
@@ -215,6 +225,14 @@ struct SlotBookingView: View {
                                     .keyboardType(.decimalPad)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .frame(height: 48)
+                                    .toolbar {
+                                            ToolbarItemGroup(placement: .keyboard) {
+                                                Spacer()
+                                                Button("⌄") {
+                                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                                }
+                                            }
+                                        }
                                 
                                 // Available slots (shown conditionally)
                                 if showAvailableSlots {
@@ -341,6 +359,7 @@ struct SlotBookingView: View {
                     Spacer()
                     Button(action: {
                         if validateConfirm() {
+                            isSubmitting = true
                             confirmBooking()
                         }
                     }) {
@@ -353,6 +372,7 @@ struct SlotBookingView: View {
                             .cornerRadius(8)
                             .shadow(radius: 4)
                     }
+                    .disabled(isSubmitting)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                 }
@@ -370,6 +390,7 @@ struct SlotBookingView: View {
                         title: Text(validationTitle),
                         message: Text(validationMessage),
                         dismissButton: .default(Text("OK")) {
+                            isSubmitting = false
                             // This triggers navigation
                             gotoHome = true
                         }
@@ -378,7 +399,9 @@ struct SlotBookingView: View {
                     return Alert(
                         title: Text(validationTitle),
                         message: Text(validationMessage),
-                        dismissButton: .default(Text("OK"))
+                        dismissButton: .default(Text("OK")) {
+                            isSubmitting = false // ✅ Reset after failure
+                        }
                     )
                 }
             }

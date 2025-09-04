@@ -89,6 +89,7 @@ struct SlotInfoView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
             .onAppear {
                 fetchSlots()
             }
@@ -117,6 +118,7 @@ struct SlotInfoView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
         .preferredColorScheme(.light)
     }
     
