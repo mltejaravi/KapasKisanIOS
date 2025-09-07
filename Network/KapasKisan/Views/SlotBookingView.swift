@@ -391,6 +391,7 @@ struct SlotBookingView: View {
                                             .tag(Optional(title))
                                     }
                                 }
+                                .disabled(true)
                                 .pickerStyle(MenuPickerStyle())
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 48)
@@ -425,6 +426,7 @@ struct SlotBookingView: View {
                                             .tag(Optional(title))
                                     }
                                 }
+                                .disabled(true)
                                 .pickerStyle(MenuPickerStyle())
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 48)
@@ -710,11 +712,29 @@ struct SlotBookingView: View {
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
-        .onAppear{
+        .onAppear {
             loadStates()
             expectedYeild = "\(SessionManager.shared.farmerDetails?.expectedYeild ?? 0)"
         }
         .preferredColorScheme(.light)
+    }
+    
+    private var preselectedState: Title? {
+        if let farmer = SessionManager.shared.farmerDetails,
+           let stateID = farmer.pkStateID,
+           let stateName = farmer.stateName {
+            return Title(id: Int(stateID), name: stateName)
+        }
+        return nil
+    }
+
+    private var preselectedDistrict: Title? {
+        if let farmer = SessionManager.shared.farmerDetails,
+           let districtID = farmer.pkDistrictID,
+           let districtName = farmer.districtName {
+            return Title(id: Int(districtID), name: districtName)
+        }
+        return nil
     }
     
     // MARK: - States
@@ -725,8 +745,14 @@ struct SlotBookingView: View {
                     switch result {
                     case .success(let titlesResponse):
                         self.states = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedState = first  // Default first
+                        // Prefer farmer’s state if available
+                        if let preState = self.preselectedState,
+                           let match = titlesResponse.first(where: { $0.id == preState.id }) {
+                            self.selectedState = match
+                            self.loadDistricts()
+                        } else {
+                            // Fallback: first state
+                            self.selectedState = titlesResponse.first
                         }
                     case .failure(let error):
                         print("Error fetching titles: \(error)")
@@ -737,19 +763,27 @@ struct SlotBookingView: View {
     }
     
     // MARK: - Districts
-    private func loadDistricts(){
+    private func loadDistricts() {
         if let token = SessionManager.shared.authToken,
            let stateId = selectedState?.id {
-            ApiService.shared.getDistricts(token: token, stateId: stateId ) { result in
+            ApiService.shared.getDistricts(token: token, stateId: stateId) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let titlesResponse):
                         self.districts = titlesResponse
-                        if let first = titlesResponse.first {
-                            self.selectedDistrict = first  // Default first
+                        
+                        // Prefer farmer’s district if available
+                        if let farmer = SessionManager.shared.farmerDetails,
+                           let districtID = farmer.pkDistrictID,
+                           let match = titlesResponse.first(where: { $0.id == Int(districtID) }) {
+                            self.selectedDistrict = match
+                        } else {
+                            // Fallback: first district
+                            self.selectedDistrict = titlesResponse.first
                         }
+                        
                     case .failure(let error):
-                        print("Error fetching titles: \(error)")
+                        print("Error fetching districts: \(error)")
                     }
                 }
             }
