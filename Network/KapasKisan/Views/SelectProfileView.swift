@@ -11,6 +11,7 @@ class SelectProfileLocalizer {
     private static let translations: [String: [String: String]] = [
         // ---------------- English ----------------
         "English": [
+            "app_title": "Kapas Kisan",
             "select_profile": "Select Profile",
             "farmer": "Farmer",
             "ginnery": "Ginnery",
@@ -25,6 +26,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Telugu ----------------
         "Telugu": [
+            "app_title": "కపాస్ కిసాన్",
             "select_profile": "ప్రొఫైల్ ఎంచుకోండి",
             "farmer": "రైతు",
             "ginnery": "జిన్నరీ",
@@ -39,6 +41,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Hindi ----------------
         "Hindi": [
+            "app_title": "कपास किसान",
             "select_profile": "प्रोफाइल चुनें",
             "farmer": "किसान",
             "ginnery": "जिनरी",
@@ -53,6 +56,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Kannada ----------------
         "Kannada": [
+            "app_title": "ಕಪಾಸ್ ಕಿಸಾನ್",
             "select_profile": "ಪ್ರೊಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
             "farmer": "ರೈತ",
             "ginnery": "ಜಿನ್ನರಿ",
@@ -67,6 +71,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Punjabi ----------------
         "Punjabi": [
+            "app_title": "ਕਪਾਸ ਕਿਸਾਨ",
             "select_profile": "ਪ੍ਰੋਫਾਈਲ ਚੁਣੋ",
             "farmer": "ਕਿਸਾਨ",
             "ginnery": "ਜਿਨਰੀ",
@@ -81,6 +86,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Marathi ----------------
         "Marathi": [
+            "app_title": "कपास किसान",
             "select_profile": "प्रोफाइल निवडा",
             "farmer": "शेतकरी",
             "ginnery": "जिनरी",
@@ -95,6 +101,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Gujarati ----------------
         "Gujarati": [
+            "app_title": "કપાસ કિસાન",
             "select_profile": "પ્રોફાઇલ પસંદ કરો",
             "farmer": "કિસાન",
             "ginnery": "જિનરી",
@@ -109,6 +116,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Tamil ----------------
         "Tamil": [
+            "app_title": "கப்பாஸ் கிசான்",
             "select_profile": "சுயவிவரத்தைத் தேர்ந்தெடுக்கவும்",
             "farmer": "விவசாயி",
             "ginnery": "ஜின்னரி",
@@ -123,6 +131,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Bengali ----------------
         "Bengali": [
+            "app_title": "কাপাস কিসান",
             "select_profile": "প্রোফাইল নির্বাচন করুন",
             "farmer": "কৃষক",
             "ginnery": "জিনারি",
@@ -137,6 +146,7 @@ class SelectProfileLocalizer {
         ],
         // ---------------- Odia ----------------
         "Oriya": [
+            "app_title": "କପାସ କିସାନ୍",
             "select_profile": "ପ୍ରୋଫାଇଲ୍ ବାଛନ୍ତୁ",
             "farmer": "କୃଷକ",
             "ginnery": "ଜିନରୀ",
@@ -257,7 +267,7 @@ struct SelectProfileView: View {
 private struct TitleSection: View {
     var body: some View {
         VStack {
-            Text("Kapas Kisan")
+            Text(SelectProfileLocalizer.t("app_title"))
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.black)
             
