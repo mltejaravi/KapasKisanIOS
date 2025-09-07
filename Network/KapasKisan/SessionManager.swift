@@ -7,6 +7,7 @@ class SessionManager {
     var isRegistered: Bool = false
     var barCode: String? = ""
     var farmerDetails: FarmerRegistrationResponse?
+    var selectedLanguage: String? = "English"
     
     func checkSession() -> Bool {
         guard let number = mobileNumber, !number.isEmpty else {

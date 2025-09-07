@@ -77,6 +77,8 @@ struct RegistrationView: View {
     
     @State private var isSubmitting = false
     
+    @State private var goToSelectProfile = false
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -872,7 +874,8 @@ struct RegistrationView: View {
                                 dismissButton: .default(Text("OK")) {
                                     isSubmitting = false
                                     // This triggers navigation
-                                    gotoHome = true
+                                    //gotoHome = true
+                                    goToSelectProfile = true
                                 }
                             )
                         } else {
@@ -892,8 +895,13 @@ struct RegistrationView: View {
             }
             // NavigationLink at the root level of ZStack
             .background(
-                NavigationLink(destination: HomeView(), isActive: $gotoHome) {
-                    EmptyView()
+                ZStack {
+                    NavigationLink(destination: HomeView(), isActive: $gotoHome) {
+                        EmptyView()
+                    }
+                    NavigationLink(destination: SelectProfileView(), isActive: $goToSelectProfile) {
+                        EmptyView()
+                    }
                 }
             )
             .navigationBarHidden(true)

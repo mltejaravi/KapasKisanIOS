@@ -79,6 +79,11 @@ struct HomeView: View {
                                         validationTitle = "User is inactive"
                                         validationMessage = "Please contact the administrator."
                                         showValidationAlert = true
+                                    } else if let barcode = SessionManager.shared.barCode,
+                                              barcode.isEmpty || barcode == "Select BarCode" {
+                                        validationTitle = "User is not registered"
+                                        validationMessage = "Please register to continue."
+                                        showValidationAlert = true
                                     } else {
                                         navigateToSlotBooking = true
                                     }
@@ -92,6 +97,11 @@ struct HomeView: View {
                                        !(farmer.isActive ?? false) {
                                         validationTitle = "User is inactive"
                                         validationMessage = "Please contact the administrator."
+                                        showValidationAlert = true
+                                    } else if let barcode = SessionManager.shared.barCode,
+                                              barcode.isEmpty || barcode == "Select BarCode" {
+                                        validationTitle = "User is not registered"
+                                        validationMessage = "Please register to continue."
                                         showValidationAlert = true
                                     } else {
                                         navigateToAddLand = true
@@ -175,8 +185,8 @@ struct HomeView: View {
                                         .resizable()
                                         .scaledToFit()
                                 }
-                                .frame(width: 100, height: 100)
-                                .padding(.top, 40)
+                                         .frame(width: 100, height: 100)
+                                         .padding(.top, 40)
                             }
                             .padding(16)
                         }
