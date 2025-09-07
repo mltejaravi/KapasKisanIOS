@@ -1,5 +1,46 @@
 import SwiftUI
 
+// MARK: - Slot info view
+
+class SlotInfoLocalizer {
+    static func t(_ key: String) -> String {
+        let lang = SessionManager.shared.selectedLanguage ?? "English"
+        return translations[lang]?[key] ?? translations["English"]?[key] ?? key
+    }
+    private static let translations: [String: [String: String]] = [
+        "English": [
+            "slot_booking_info": "Slot Booking Information"
+        ],
+        "Telugu": [
+            "slot_booking_info": "స్లాట్ బుకింగ్ సమాచారం"
+        ],
+        "Hindi": [
+            "slot_booking_info": "स्लॉट बुकिंग जानकारी"
+        ],
+        "Kannada": [
+            "slot_booking_info": "ಸ್ಲಾಟ್ ಬುಕ್ಕಿಂಗ್ ಮಾಹಿತಿ"
+        ],
+        "Tamil": [
+            "slot_booking_info": "ஸ்லாட் முன்பதிவு தகவல்"
+        ],
+        "Bengali": [
+            "slot_booking_info": "স্লট বুকিং তথ্য"
+        ],
+        "Gujarati": [
+            "slot_booking_info": "સ્લોટ બુકિંગ માહિતી"
+        ],
+        "Punjabi": [
+            "slot_booking_info": "ਸਲੌਟ ਬੁਕਿੰਗ ਜਾਣਕਾਰੀ"
+        ],
+        "Marathi": [
+            "slot_booking_info": "स्लॉट बुकिंग माहिती"
+        ],
+        "Odia": [
+            "slot_booking_info": "ସ୍ଲଟ ବୁକିଂ ସୂଚନା"
+        ]
+    ]
+}
+
 struct SlotInfoView: View {
     @State private var slotInfoItems: [SlotBookingInfo] = []
     @State private var isLoading = true
@@ -15,13 +56,13 @@ struct SlotInfoView: View {
         NavigationView {
             ZStack {
                 Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all)
-
+                
                 VStack(spacing: 0) {
                     Rectangle()
                         .fill(Color.blue)
                         .frame(height: 2)
                         .edgesIgnoringSafeArea(.top)
-
+                    
                     HStack {
                         NavigationLink(destination: HomeView(), isActive: $gotoHome) {
                             Button(action: { gotoHome = true }) {
@@ -33,14 +74,14 @@ struct SlotInfoView: View {
                             }
                             .padding(.leading, 12)
                         }
-
-                        Text("Slot Booking Information")
+                        
+                        Text(SlotInfoLocalizer.t("slot_booking_info"))
                             .font(.system(size: 25, weight: .bold))
                             .frame(maxWidth: .infinity)
                     }
                     .padding(.top, 16)
                     .padding(.bottom, 8)
-
+                    
                     if isLoading {
                         ProgressView("Loading...")
                             .padding(.top, 50)
@@ -67,11 +108,11 @@ struct SlotInfoView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
                     }
-
+                    
                     Spacer()
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
-
+                
                 VStack {
                     Spacer()
                     Button(action: { gotoHome = true }) {

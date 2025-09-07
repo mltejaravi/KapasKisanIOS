@@ -361,6 +361,7 @@ private struct RegisterNowCard: View {
                     //checkATTBeforeFeatureAccess {
                     navigateToRegistration = true
                     //}
+                    SessionManager.shared.barCode = nil
                 }) {
                     Text(SelectProfileLocalizer.t("register_now"))
                         .font(.system(size: 16))

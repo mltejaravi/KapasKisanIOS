@@ -275,13 +275,15 @@ struct HomeView: View {
                                 MenuCard(iconName: "calendar.badge.clock",
                                          buttonText: HomeViewLocalizer.t("book_slot"),
                                          buttonColor: .blue) {
+                                    
+                                    let barcode = SessionManager.shared.barCode ?? ""
                                     if let farmer = SessionManager.shared.farmerDetails,
                                        !(farmer.isActive ?? false) {
                                         validationTitle = HomeViewLocalizer.t("user_inactive_title")
                                         validationMessage = HomeViewLocalizer.t("user_inactive_message")
                                         showValidationAlert = true
-                                    } else if let barcode = SessionManager.shared.barCode,
-                                              barcode.isEmpty || barcode == "Select BarCode" {
+                                    } else if (barcode.isEmpty || barcode == "Select BarCode"
+                                    || barcode == "") {
                                         validationTitle = HomeViewLocalizer.t("user_not_registered_title")
                                         validationMessage = HomeViewLocalizer.t("user_not_registered_message")
                                         showValidationAlert = true
@@ -294,13 +296,15 @@ struct HomeView: View {
                                 MenuCard(iconName: "plus.viewfinder",
                                          buttonText: HomeViewLocalizer.t("add_land"),
                                          buttonColor: .blue) {
+                                    let barcode = SessionManager.shared.barCode ?? ""
+                                    
                                     if let farmer = SessionManager.shared.farmerDetails,
                                        !(farmer.isActive ?? false) {
                                         validationTitle = HomeViewLocalizer.t("user_inactive_title")
                                         validationMessage = HomeViewLocalizer.t("user_inactive_message")
                                         showValidationAlert = true
-                                    } else if let barcode = SessionManager.shared.barCode,
-                                              barcode.isEmpty || barcode == "Select BarCode" {
+                                    } else if (barcode.isEmpty || barcode == "Select BarCode"
+                                               || barcode == ""){
                                         validationTitle = HomeViewLocalizer.t("user_not_registered_title")
                                         validationMessage = HomeViewLocalizer.t("user_not_registered_message")
                                         showValidationAlert = true

@@ -1,5 +1,339 @@
 import SwiftUI
 
+// MARK: - Registration View Localizer
+
+class RegistrationLocalizer {
+    static func t(_ key: String) -> String {
+        let lang = SessionManager.shared.selectedLanguage ?? "English"
+        return translations[lang]?[key] ?? translations["English"]?[key] ?? key
+    }
+    
+    private static let translations: [String: [String: String]] = [
+        "English": [
+            "farmer_registration":"Farmer Registration",
+            "reg_number": "Registration Number",
+            "select_title": "Select Title",
+            "farmer_name": "Farmer Name",
+            "father_name": "Father's Name",
+            "select_gender": "Select Gender",
+            "select_dob": "Select Date of Birth",
+            "select_caste": "Select Caste",
+            "aadhar_number": "Aadhar Number",
+            "mobile_number": "Mobile Number",
+            "address": "Address",
+            "land_details": "Land Details",
+            "select_state": "Select State",
+            "select_district": "Select District",
+            "select_mandal_block": "Select Mandal/Block",
+            "select_villate": "Select Village",
+            "select_market": "Select Market",
+            "select_farmer_type": "Select Farmer Type",
+            "select_measure_type": "Select Measure Type",
+            "passbook_no": "Passbook No/Khatha No",
+            "total_land": "Total Land",
+            "cotton_land": "Cotton Land",
+            "select_crop_type": "Select Crop Type",
+            "traditional_crop": "Traditional Crop",
+            "hdps": "HDPS",
+            "desi_cotton": "Desi Cotton",
+            "closer_spacing": "Closer Spacing",
+            "upload_farmer_photo": "Upload Farmer Photo and Aadhar (Image Only)",
+            "upload_land_documents": "Upload Land Documents (PDF Only)",
+            "submit_registration": "Submit Registration"
+        ],
+        "Telugu": [
+            "farmer_registration":"రైతు నమోదు",
+            "reg_number": "రిజిస్ట్రేషన్ నంబర్",
+            "select_title": "శీర్షికను ఎంచుకోండి",
+            "farmer_name": "రైతు పేరు",
+            "father_name": "తండ్రి పేరు",
+            "select_gender": "లింగాన్ని ఎంచుకోండి",
+            "select_dob": "పుట్టిన తేదీని ఎంచుకోండి",
+            "select_caste": "కులాన్ని ఎంచుకోండి",
+            "aadhar_number": "ఆధార్ నంబర్",
+            "mobile_number": "మొబైల్ నంబర్",
+            "address": "చిరునామా",
+            "land_details": "భూమి వివరాలు",
+            "select_state": "రాష్ట్రాన్ని ఎంచుకోండి",
+            "select_district": "జిల్లాను ఎంచుకోండి",
+            "select_mandal_block": "మండలం/బ్లాక్ ఎంచుకోండి",
+            "select_villate": "గ్రామాన్ని ఎంచుకోండి",
+            "select_market": "మార్కెట్ ఎంచుకోండి",
+            "select_farmer_type": "రైతు రకాన్ని ఎంచుకోండి",
+            "select_measure_type": "కొలత రకాన్ని ఎంచుకోండి",
+            "passbook_no": "పాస్బుక్ నంబర్/ఖతా నంబర్",
+            "total_land": "మొత్తం భూమి",
+            "cotton_land": "పత్తి భూమి",
+            "select_crop_type": "పంట రకాన్ని ఎంచుకోండి",
+            "traditional_crop": "సాంప్రదాయ పంట",
+            "hdps": "హెచ్.డి.పి.ఎస్",
+            "desi_cotton": "దేశీ పత్తి",
+            "closer_spacing": "క్లోజర్ స్పేసింగ్",
+            "upload_farmer_photo": "రైతు ఫోటో మరియు ఆధార్ అప్లోడ్ చేయండి (చిత్రం మాత్రమే)",
+            "upload_land_documents": "భూమి డాక్యుమెంట్స్ అప్లోడ్ చేయండి (PDF మాత్రమే)",
+            "submit_registration": "నమోదును సమర్పించండి"
+        ],
+        "Hindi": [
+            "farmer_registration":"किसान पंजीकरण",
+            "reg_number": "पंजीकरण संख्या",
+            "select_title": "शीर्षक चुनें",
+            "farmer_name": "किसान का नाम",
+            "father_name": "पिता का नाम",
+            "select_gender": "लिंग चुनें",
+            "select_dob": "जन्म तिथि चुनें",
+            "select_caste": "जाति चुनें",
+            "aadhar_number": "आधार नंबर",
+            "mobile_number": "मोबाइल नंबर",
+            "address": "पता",
+            "land_details": "जमीन का विवरण",
+            "select_state": "राज्य चुनें",
+            "select_district": "जिला चुनें",
+            "select_mandal_block": "मंडल/ब्लॉक चुनें",
+            "select_villate": "गाँव चुनें",
+            "select_market": "बाजार चुनें",
+            "select_farmer_type": "किसान प्रकार चुनें",
+            "select_measure_type": "माप प्रकार चुनें",
+            "passbook_no": "पासबुक नंबर/खाता नंबर",
+            "total_land": "कुल जमीन",
+            "cotton_land": "कपास जमीन",
+            "select_crop_type": "फसल प्रकार चुनें",
+            "traditional_crop": "पारंपरिक फसल",
+            "hdps": "एचडीपीएस",
+            "desi_cotton": "देशी कपास",
+            "closer_spacing": "क्लोजर स्पेसिंग",
+            "upload_farmer_photo": "किसान फोटो और आधार अपलोड करें (केवल छवि)",
+            "upload_land_documents": "जमीन के दस्तावेज़ अपलोड करें (केवल PDF)",
+            "submit_registration": "पंजीकरण जमा करें"
+        ],
+        "Kannada": [
+            "farmer_registration":"ರೈತ ನೋಂದಣಿ",
+            "reg_number": "ನೋಂದಣಿ ಸಂಖ್ಯೆ",
+            "select_title": "ಶೀರ್ಷಿಕೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "farmer_name": "ರೈತರ ಹೆಸರು",
+            "father_name": "ತಂದೆಯ ಹೆಸರು",
+            "select_gender": "ಲಿಂಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_dob": "ಜನ್ಮ ದಿನಾಂಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_caste": "ಜಾತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "aadhar_number": "ಆಧಾರ್ ಸಂಖ್ಯೆ",
+            "mobile_number": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ",
+            "address": "ವಿಳಾಸ",
+            "land_details": "ಭೂಮಿ ವಿವರಗಳು",
+            "select_state": "ರಾಜ್ಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_district": "ಜಿಲ್ಲೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_mandal_block": "ಮಂಡಲ/ಬ್ಲಾಕ್ ಆಯ್ಕೆಮಾಡಿ",
+            "select_villate": "ಗ್ರಾಮವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_market": "ಮಾರುಕಟ್ಟೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_farmer_type": "ರೈತ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "select_measure_type": "ಮಾಪನ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "passbook_no": "ಪಾಸ್ಬುಕ್ ನಂ./ಖಾತಾ ನಂ.",
+            "total_land": "ಒಟ್ಟು ಭೂಮಿ",
+            "cotton_land": "ಹತ್ತಿ ಭೂಮಿ",
+            "select_crop_type": "ಬೆಳೆ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "traditional_crop": "ಸಾಂಪ್ರದಾಯಿಕ ಬೆಳೆ",
+            "hdps": "ಎಚ್ಡಿಪಿಎಸ್",
+            "desi_cotton": "ದೇಶಿ ಹತ್ತಿ",
+            "closer_spacing": "ಕ್ಲೋಸರ್ ಸ್ಪೇಸಿಂಗ್",
+            "upload_farmer_photo": "ರೈತ ಫೋಟೋ ಮತ್ತು ಆಧಾರ್ ಅಪ್ಲೋಡ್ ಮಾಡಿ (ಚಿತ್ರ ಮಾತ್ರ)",
+            "upload_land_documents": "ಭೂಮಿ ದಾಖಲೆಗಳನ್ನು ಅಪ್ಲೋಡ್ ಮಾಡಿ (PDF ಮಾತ್ರ)",
+            "submit_registration": "ನೋಂದಣಿ ಸಲ್ಲಿಸಿ"
+        ],
+        "Tamil": [
+            "farmer_registration":"விவசாயி பதிவு",
+            "reg_number": "பதிவு எண்",
+            "select_title": "தலைப்பைத் தேர்ந்தெடுக்கவும்",
+            "farmer_name": "விவசாயி பெயர்",
+            "father_name": "தந்தை பெயர்",
+            "select_gender": "பாலினத்தைத் தேர்ந்தெடுக்கவும்",
+            "select_dob": "பிறந்த தேதியைத் தேர்ந்தெ�ுக்கவும்",
+            "select_caste": "சாதியைத் தேர்ந்தெடுக்கவும்",
+            "aadhar_number": "ஆதார் எண்",
+            "mobile_number": "மொபைல் எண்",
+            "address": "முகவரி",
+            "land_details": "நில விவரங்கள்",
+            "select_state": "மாநிலத்தைத் தேர்ந்தெடுக்கவும்",
+            "select_district": "மாவட்டத்தைத் தேர்ந்தெடுக்கவும்",
+            "select_mandal_block": "மண்டல்/பிளாக் தேர்ந்தெடுக்கவும்",
+            "select_villate": "கிராமத்தைத் தேர்ந்தெடுக்கவும்",
+            "select_market": "சந்தையைத் தேர்ந்தெடுக்கவும்",
+            "select_farmer_type": "விவசாயி வகையைத் தேர்ந்தெடுக்கவும்",
+            "select_measure_type": "அளவீடு வகையைத் தேர்ந்தெடுக்கவும்",
+            "passbook_no": "பாஸ்புக் எண்/கதா எண்",
+            "total_land": "மொத்த நிலம்",
+            "cotton_land": "பருத்தி நிலம்",
+            "select_crop_type": "பயிர் வகையைத் தேர்ந்தெடுக்கவும்",
+            "traditional_crop": "பாரம்பரிய பயிர்",
+            "hdps": "எச்டிபிஎஸ்",
+            "desi_cotton": "தேசி பருத்தி",
+            "closer_spacing": "குளோசர் ஸ்பேசிங்",
+            "upload_farmer_photo": "விவசாயி படம் மற்றும் ஆதாரைப் பதிவேற்றவும் (படம் மட்டும்)",
+            "upload_land_documents": "நில ஆவணங்களைப் பதிவேற்றவும் (PDF மட்டும்)",
+            "submit_registration": "பதிவைச் சமர்ப்பிக்கவும்"
+        ],
+        "Bengali": [
+            "farmer_registration":"কৃষক নিবন্ধন",
+            "reg_number": "নিবন্ধন নম্বর",
+            "select_title": "শিরোনাম নির্বাচন করুন",
+            "farmer_name": "কৃষকের নাম",
+            "father_name": "পিতার নাম",
+            "select_gender": "লিঙ্গ নির্বাচন করুন",
+            "select_dob": "জন্ম তারিখ নির্বাচন করুন",
+            "select_caste": "বর্ণ নির্বাচন করুন",
+            "aadhar_number": "আধার নম্বর",
+            "mobile_number": "মোবাইল নম্বর",
+            "address": "ঠিকানা",
+            "land_details": "জমির বিবরণ",
+            "select_state": "রাজ্য নির্বাচন করুন",
+            "select_district": "জেলা নির্বাচন করুন",
+            "select_mandal_block": "মণ্ডল/ব্লক নির্বাচন করুন",
+            "select_villate": "গ্রাম নির্বাচন করুন",
+            "select_market": "বাজার নির্বাচন করুন",
+            "select_farmer_type": "কৃষক প্রকার নির্বাচন করুন",
+            "select_measure_type": "মাপের প্রকার নির্বাচন করুন",
+            "passbook_no": "পাসবুক নম্বর/খাতা নম্বর",
+            "total_land": "মোট জমি",
+            "cotton_land": "তুলা জমি",
+            "select_crop_type": "ফসলের প্রকার নির্বাচন করুন",
+            "traditional_crop": "প্রথাগত ফসল",
+            "hdps": "এইচডিপিএস",
+            "desi_cotton": "দেশি তুলা",
+            "closer_spacing": "ক্লোজার স্পেসিং",
+            "upload_farmer_photo": "কৃষকের ফটো এবং আধার আপলোড করুন (শুধুমাত্র ছবি)",
+            "upload_land_documents": "জমির দলিল আপলোড করুন (শুধুমাত্র PDF)",
+            "submit_registration": "নিবন্ধন জমা দিন"
+        ],
+        "Gujarati": [
+            "farmer_registration":"કિસાન નોંધણી",
+            "reg_number": "નોંધણી નંબર",
+            "select_title": "શીર્ષક પસંદ કરો",
+            "farmer_name": "કિસાનનું નામ",
+            "father_name": "પિતાનું નામ",
+            "select_gender": "લિંગ પસંદ કરો",
+            "select_dob": "જન્મ તારીખ પસંદ કરો",
+            "select_caste": "જાતિ પસંદ કરો",
+            "aadhar_number": "આધાર નંબર",
+            "mobile_number": "મોબાઇલ નંબર",
+            "address": "સરનામું",
+            "land_details": "જમીનની વિગતો",
+            "select_state": "રાજ્ય પસંદ કરો",
+            "select_district": "જિલ્લો પસંદ કરો",
+            "select_mandal_block": "મંડળ/બ્લોક પસંદ કરો",
+            "select_villate": "ગામ પસંદ કરો",
+            "select_market": "માર્કેટ પસંદ કરો",
+            "select_farmer_type": "કિસાન પ્રકાર પસંદ કરો",
+            "select_measure_type": "માપ પ્રકાર પસંદ કરો",
+            "passbook_no": "પાસબુક નંબર/ખાતા નંબર",
+            "total_land": "કુલ જમીન",
+            "cotton_land": "કપાસ જમીન",
+            "select_crop_type": "પાક પ્રકાર પસંદ કરો",
+            "traditional_crop": "પરંપરાગત પાક",
+            "hdps": "એચડીપીએસ",
+            "desi_cotton": "દેશી કપાસ",
+            "closer_spacing": "ક્લોઝર સ્પેસિંગ",
+            "upload_farmer_photo": "કિસાન ફોટો અને આધાર અપલોડ કરો (ફક્ત ઇમેજ)",
+            "upload_land_documents": "જમીન દસ્તાવેજો અપલોડ કરો (ફક્ત PDF)",
+            "submit_registration": "નોંધણી સબમિટ કરો"
+        ],
+        "Punjabi": [
+            "farmer_registration":"ਕਿਸਾਨ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+            "reg_number": "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਨੰਬਰ",
+            "select_title": "ਟਾਈਟਲ ਚੁਣੋ",
+            "farmer_name": "ਕਿਸਾਨ ਦਾ ਨਾਮ",
+            "father_name": "ਪਿਤਾ ਦਾ ਨਾਮ",
+            "select_gender": "ਲਿੰਗ ਚੁਣੋ",
+            "select_dob": "ਜਨਮ ਤਾਰੀਖ ਚੁਣੋ",
+            "select_caste": "ਜਾਤੀ ਚੁਣੋ",
+            "aadhar_number": "ਆਧਾਰ ਨੰਬਰ",
+            "mobile_number": "ਮੋਬਾਈਲ ਨੰਬਰ",
+            "address": "ਪਤਾ",
+            "land_details": "ਜ਼ਮੀਨ ਦੇ ਵੇਰਵੇ",
+            "select_state": "ਰਾਜ ਚੁਣੋ",
+            "select_district": "ਜ਼ਿਲ੍ਹਾ ਚੁਣੋ",
+            "select_mandal_block": "ਮੰਡਲ/ਬਲਾਕ ਚੁਣੋ",
+            "select_villate": "ਪਿੰਡ ਚੁਣੋ",
+            "select_market": "ਮਾਰਕੀਟ ਚੁਣੋ",
+            "select_farmer_type": "ਕਿਸਾਨ ਪ੍ਰਕਾਰ ਚੁਣੋ",
+            "select_measure_type": "ਮਾਪ ਪ੍ਰਕਾਰ ਚੁਣੋ",
+            "passbook_no": "ਪਾਸਬੁੱਕ ਨੰਬਰ/ਖਾਤਾ ਨੰਬਰ",
+            "total_land": "ਕੁੱਲ ਜ਼ਮੀਨ",
+            "cotton_land": "ਕਪਾਹ ਜ਼ਮੀਨ",
+            "select_crop_type": "ਫਸਲ ਪ੍ਰਕਾਰ ਚੁਣੋ",
+            "traditional_crop": "ਰਵਾਇਤੀ ਫਸਲ",
+            "hdps": "ਐਚਡੀਪੀਐਸ",
+            "desi_cotton": "ਦੇਸੀ ਕਪਾਹ",
+            "closer_spacing": "ਕਲੋਜ਼ਰ ਸਪੇਸਿੰਗ",
+            "upload_farmer_photo": "ਕਿਸਾਨ ਫੋਟੋ ਅਤੇ ਆਧਾਰ ਅਪਲੋਡ ਕਰੋ (ਸਿਰਫ਼ ਚਿੱਤਰ)",
+            "upload_land_documents": "ਜ਼ਮੀਨ ਦੇ ਦਸਤਾਵੇਜ਼ ਅਪਲੋਡ ਕਰੋ (ਸਿਰਫ਼ PDF)",
+            "submit_registration": "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਜਮ੍ਹਾਂ ਕਰੋ"
+        ],
+        "Marathi": [
+            "farmer_registration":"शेतकरी नोंदणी",
+            "reg_number": "नोंदणी क्रमांक",
+            "select_title": "शीर्षक निवडा",
+            "farmer_name": "शेतकरी नाव",
+            "father_name": "वडिलांचे नाव",
+            "select_gender": "लिंग निवडा",
+            "select_dob": "जन्मतारीख निवडा",
+            "select_caste": "जात निवडा",
+            "aadhar_number": "आधार नंबर",
+            "mobile_number": "मोबाइल नंबर",
+            "address": "पत्ता",
+            "land_details": "जमीन तपशील",
+            "select_state": "राज्य निवडा",
+            "select_district": "जिल्हा निवडा",
+            "select_mandal_block": "मंडळ/ब्लॉक निवडा",
+            "select_villate": "गाव निवडा",
+            "select_market": "बाजार निवडा",
+            "select_farmer_type": "शेतकरी प्रकार निवडा",
+            "select_measure_type": "माप प्रकार निवडा",
+            "passbook_no": "पासबुक नं./खाता नं.",
+            "total_land": "एकूण जमीन",
+            "cotton_land": "कापूस जमीन",
+            "select_crop_type": "पीक प्रकार निवडा",
+            "traditional_crop": "पारंपरिक पीक",
+            "hdps": "एचडीपीएस",
+            "desi_cotton": "देशी कापूस",
+            "closer_spacing": "क्लोजर स्पेसिंग",
+            "upload_farmer_photo": "शेतकरी फोटो आणि आधार अपलोड करा (फक्त प्रतिमा)",
+            "upload_land_documents": "जमीन दस्तऐवज अपलोड करा (फक्त PDF)",
+            "submit_registration": "नोंदणी सबमिट करा"
+        ],
+        "Odia": [
+            "farmer_registration":"କୃଷକ ପଞ୍ଜୀକରଣ",
+            "reg_number": "ପଞ୍ଜୀକରଣ ସଂଖ୍ୟା",
+            "select_title": "ଶୀର୍ଷକ ବାଛନ୍ତୁ",
+            "farmer_name": "କୃଷକର ନାମ",
+            "father_name": "ପିତାଙ୍କ ନାମ",
+            "select_gender": "ଲିଙ୍ଗ ବାଛନ୍ତୁ",
+            "select_dob": "ଜନ୍ମ ତାରିଖ ବାଛନ୍ତୁ",
+            "select_caste": "ଜାତି ବାଛନ୍ତୁ",
+            "aadhar_number": "ଆଧାର ନମ୍ବର",
+            "mobile_number": "ମୋବାଇଲ୍ ନମ୍ବର",
+            "address": "ଠିକଣା",
+            "land_details": "ଜମିର ବିବରଣୀ",
+            "select_state": "ରାଜ୍ୟ ବାଛନ୍ତୁ",
+            "select_district": "ଜିଲ୍ଲା ବାଛନ୍ତୁ",
+            "select_mandal_block": "ମଣ୍ଡଳ/ବ୍ଲକ୍ ବାଛନ୍ତୁ",
+            "select_villate": "ଗ୍ରାମ ବାଛନ୍ତୁ",
+            "select_market": "ବଜାର ବାଛନ୍ତୁ",
+            "select_farmer_type": "କୃଷକ ପ୍ରକାର ବାଛନ୍ତୁ",
+            "select_measure_type": "ମାପ ପ୍ରକାର ବାଛନ୍ତୁ",
+            "passbook_no": "ପାସବୁକ୍ ନମ୍ବର/ଖାତା ନମ୍ବର",
+            "total_land": "ମୋଟ ଜମି",
+            "cotton_land": "କପାହ ଜମି",
+            "select_crop_type": "ଫସଲ ପ୍ରକାର ବାଛନ୍ତୁ",
+            "traditional_crop": "ପାରମ୍ପରିକ ଫସଲ",
+            "hdps": "ଏଚଡିପିଏସ",
+            "desi_cotton": "ଦେଶୀ କପାହ",
+            "closer_spacing": "କ୍ଲୋଜର୍ ସ୍ପେସିଂ",
+            "upload_farmer_photo": "କୃଷକ ଫଟୋ ଏବଂ ଆଧାର ଅପଲୋଡ୍ କରନ୍ତୁ (କେବଳ ପ୍ରତିଛବି)",
+            "upload_land_documents": "ଜମି ଡକ୍ୟୁମେଣ୍ଟସ୍ ଅପଲୋଡ୍ କରନ୍ତୁ (କେବଳ PDF)",
+            "submit_registration": "ପଞ୍ଜୀକରଣ ଦାଖଲ କରନ୍ତୁ"
+        ]
+    ]
+}
+
+
+// MARK: - Registration View
 struct RegistrationView: View {
     // State variables for form fields
     @State private var registrationNumber: String = ""
@@ -106,7 +440,7 @@ struct RegistrationView: View {
                         }
                         .padding(.leading, 12)
                         
-                        Text("Farmer Registration")
+                        Text(RegistrationLocalizer.t("farmer_registration"))
                             .font(.system(size: 24, weight: .bold))
                             .frame(maxWidth: .infinity)
                     }
@@ -120,7 +454,7 @@ struct RegistrationView: View {
                             VStack(spacing: 16) {
                                 Group {
                                     // Registration Number
-                                    TextField("Registration Number", text: $registrationNumber)
+                                    TextField(RegistrationLocalizer.t("reg_number"), text: $registrationNumber)
                                         .disabled(true)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .toolbar {
@@ -133,11 +467,11 @@ struct RegistrationView: View {
                                             }
                                     
                                     // Title selection
-                                    Text("Select Title")
+                                    Text(RegistrationLocalizer.t("select_title"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Title", selection: $selectedTitle) {
+                                    Picker(RegistrationLocalizer.t("select_title"), selection: $selectedTitle) {
                                         ForEach(titles, id: \.id) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -167,7 +501,7 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Farmer Name
-                                    TextField("Farmer Name", text: $farmerName)
+                                    TextField(RegistrationLocalizer.t("farmer_name"), text: $farmerName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .toolbar {
                                                 ToolbarItemGroup(placement: .keyboard) {
@@ -179,7 +513,7 @@ struct RegistrationView: View {
                                             }
                                     
                                     // Father's Name
-                                    TextField("Father's Name", text: $fatherName)
+                                    TextField(RegistrationLocalizer.t("father_name"), text: $fatherName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .toolbar {
                                                 ToolbarItemGroup(placement: .keyboard) {
@@ -191,11 +525,11 @@ struct RegistrationView: View {
                                             }
                                     
                                     // Gender selection
-                                    Text("Select Gender")
+                                    Text(RegistrationLocalizer.t("select_gender"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Gender", selection: $selectedGender) {
+                                    Picker(RegistrationLocalizer.t("select_gender"), selection: $selectedGender) {
                                         ForEach(genders, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -218,6 +552,11 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Date of Birth
+                                    
+                                    Text(RegistrationLocalizer.t("select_dob"))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .font(.system(size: 14))
+                                    
                                     Button(action: {
                                         showingDatePicker = true
                                     }) {
@@ -237,18 +576,18 @@ struct RegistrationView: View {
                                         )
                                     }
                                     .sheet(isPresented: $showingDatePicker) {
-                                        DatePicker("Select Date of Birth", selection: $dob, displayedComponents: .date)
+                                        DatePicker(RegistrationLocalizer.t("select_dob"), selection: $dob, displayedComponents: .date)
                                             .datePickerStyle(GraphicalDatePickerStyle())
                                             .labelsHidden()
                                             .padding()
                                     }
                                     
                                     // Category selection
-                                    Text("Select Caste")
+                                    Text(RegistrationLocalizer.t("select_caste"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Caste", selection: $selectedCategory) {
+                                    Picker(RegistrationLocalizer.t("select_caste"), selection: $selectedCategory) {
                                         ForEach(categories, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -271,7 +610,7 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Aadhar Number
-                                    TextField("Aadhar Number", text: $aadharNumber)
+                                    TextField(RegistrationLocalizer.t("aadhar_number"), text: $aadharNumber)
                                         .keyboardType(.numberPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .onChange(of: aadharNumber) { newValue in
@@ -292,7 +631,7 @@ struct RegistrationView: View {
                                             }
                                     
                                     // Mobile Number
-                                    TextField("Mobile Number", text: $mobileNumber)
+                                    TextField(RegistrationLocalizer.t("mobile_number"), text: $mobileNumber)
                                         .keyboardType(.phonePad)
                                         .disabled(true)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -316,7 +655,7 @@ struct RegistrationView: View {
                                 
                                 Group {
                                     // Address
-                                    TextField("Address", text: $address)
+                                    TextField(RegistrationLocalizer.t("address"), text: $address)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .toolbar {
                                                 ToolbarItemGroup(placement: .keyboard) {
@@ -328,18 +667,18 @@ struct RegistrationView: View {
                                             }
                                     
                                     // Land Details Section
-                                    Text("Land Details")
+                                    Text(RegistrationLocalizer.t("land_details"))
                                         .font(.system(size: 14, weight: .bold))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .padding(.top, 8)
                                     
                                     
                                     // State selection
-                                    Text("Select State")
+                                    Text(RegistrationLocalizer.t("select_state"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select State", selection: $selectedState) {
+                                    Picker(RegistrationLocalizer.t("select_state"), selection: $selectedState) {
                                         ForEach(states, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -378,11 +717,11 @@ struct RegistrationView: View {
                                     }
                                     
                                     // District selection
-                                    Text("Select District")
+                                    Text(RegistrationLocalizer.t("select_district"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select District", selection: $selectedDistrict) {
+                                    Picker(RegistrationLocalizer.t("select_district"), selection: $selectedDistrict) {
                                         ForEach(districts, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -421,11 +760,11 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Mandal selection
-                                    Text("Select Mandal/Block")
+                                    Text(RegistrationLocalizer.t("select_mandal_block"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Mandal/Block", selection: $selectedMandal) {
+                                    Picker(RegistrationLocalizer.t("select_mandal_block"), selection: $selectedMandal) {
                                         ForEach(mandals, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -459,11 +798,11 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Village selection
-                                    Text("Select Village")
+                                    Text(RegistrationLocalizer.t("select_villate"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Village", selection: $selectedVillage) {
+                                    Picker(RegistrationLocalizer.t("select_villate"), selection: $selectedVillage) {
                                         ForEach(villages, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -487,11 +826,11 @@ struct RegistrationView: View {
                                     
                                     
                                     // Market selection
-                                    Text("Select Market")
+                                    Text(RegistrationLocalizer.t("select_market"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Market", selection: $selectedMarket) {
+                                    Picker(RegistrationLocalizer.t("select_market"), selection: $selectedMarket) {
                                         ForEach(markets, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -514,11 +853,11 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Farmer Type selection
-                                    Text("Select Farmer Type")
+                                    Text(RegistrationLocalizer.t("select_farmer_type"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Farmer Type", selection: $selectedFarmerType) {
+                                    Picker(RegistrationLocalizer.t("select_farmer_type"), selection: $selectedFarmerType) {
                                         ForEach(farmerTypes, id: \.self) { title in
                                             Text(title.name)
                                                 .tag(Optional(title))
@@ -534,11 +873,11 @@ struct RegistrationView: View {
                                             .stroke(Color.gray, lineWidth: 1)
                                     )
                                     
-                                    Text("Select Measure Type")
+                                    Text(RegistrationLocalizer.t("select_measure_type"))
                                         .frame(maxWidth:.infinity, alignment:.leading)
                                         .font(.system(size: 14))
                                     
-                                    Picker("Select Measure Type", selection: $selectedMeasureType) {
+                                    Picker(RegistrationLocalizer.t("select_measure_type"), selection: $selectedMeasureType) {
                                         ForEach(measureTypes, id: \.self) { type in
                                             Text(type).tag(type)
                                         }
@@ -559,7 +898,7 @@ struct RegistrationView: View {
                                         (uniqueNames?.uniQ_ID_3_NAMING?.isEmpty ?? true) &&
                                         (uniqueNames?.uniQ_ID_4_NAMING?.isEmpty ?? true) {
                                         
-                                        TextField("Passbook No / Khatha No", text: $passbookNumber)
+                                        TextField(RegistrationLocalizer.t("passbook_no"), text: $passbookNumber)
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                     }
                                     
@@ -581,7 +920,7 @@ struct RegistrationView: View {
                                     }
                                     
                                     // Total Land
-                                    TextField("Total Land", text: $totalLand)
+                                    TextField(RegistrationLocalizer.t("total_land"), text: $totalLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .toolbar {
@@ -594,7 +933,7 @@ struct RegistrationView: View {
                                             }
                                     
                                     // Cotton Land
-                                    TextField("Cotton Land", text: $cottonLand)
+                                    TextField(RegistrationLocalizer.t("cotton_land"), text: $cottonLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .toolbar {
@@ -606,13 +945,13 @@ struct RegistrationView: View {
                                                 }
                                             }
                                     
-                                    Text("Select Crop Type")
+                                    Text(RegistrationLocalizer.t("select_crop_type"))
                                         .font(.headline)
                                         .foregroundColor(.black)
                                     
                                     /// Traditional Crop
                                     HStack {
-                                        Toggle("Traditional Crop", isOn: $isTraditional)
+                                        Toggle(RegistrationLocalizer.t("traditional_crop"), isOn: $isTraditional)
                                             .toggleStyle(ChkCheckboxToggleStyle())
                                             .onChange(of: isTraditional) { newValue in
                                                 if !newValue { traditionalLand = "" }
@@ -635,7 +974,7 @@ struct RegistrationView: View {
                                     
                                     // HDPS
                                     HStack {
-                                        Toggle("HDPS", isOn: $isHDPS)
+                                        Toggle(RegistrationLocalizer.t("hdps"), isOn: $isHDPS)
                                             .toggleStyle(ChkCheckboxToggleStyle())
                                             .onChange(of: isHDPS) { newValue in
                                                 if !newValue { hdpsLand = "" }
@@ -658,7 +997,7 @@ struct RegistrationView: View {
                                     
                                     // Desi Cotton
                                     HStack {
-                                        Toggle("Desi Cotton", isOn: $isDesiCotton)
+                                        Toggle(RegistrationLocalizer.t("desi_cotton"), isOn: $isDesiCotton)
                                             .toggleStyle(ChkCheckboxToggleStyle())
                                             .onChange(of: isDesiCotton) { newValue in
                                                 if !newValue { desiCottonLand = "" }
@@ -681,7 +1020,7 @@ struct RegistrationView: View {
                                     
                                     // Closer Spacing
                                     HStack {
-                                        Toggle("Closer Spacing", isOn: $isCloserSpacing)
+                                        Toggle(RegistrationLocalizer.t("closer_spacing"), isOn: $isCloserSpacing)
                                             .toggleStyle(ChkCheckboxToggleStyle())
                                             .onChange(of: isCloserSpacing) { newValue in
                                                 if !newValue { closerSpacingLand = "" }
@@ -708,7 +1047,7 @@ struct RegistrationView: View {
                                     Button(action: {
                                         showImageSourceActionSheet = true
                                     }) {
-                                        Text("Upload Farmer Photo and Aadhar (Image Only)")
+                                        Text(RegistrationLocalizer.t("upload_farmer_photo"))
                                             .frame(maxWidth: .infinity)
                                             .padding()
                                             .background(Color.blue)
@@ -768,7 +1107,7 @@ struct RegistrationView: View {
                                     Button(action: {
                                         showingDocumentPicker = true
                                     }) {
-                                        Text("Upload Land Documents (PDF Only)")
+                                        Text(RegistrationLocalizer.t("upload_land_documents"))
                                             .frame(maxWidth: .infinity)
                                             .padding()
                                             .background(Color.blue)
@@ -850,7 +1189,7 @@ struct RegistrationView: View {
                             showValidationAlert = true
                         }
                     }) {
-                        Text("Submit Registration")
+                        Text(RegistrationLocalizer.t("submit_registration"))
                             .font(.system(size: 18, weight: .bold))
                             .frame(maxWidth: .infinity)
                             .frame(height: 60)
