@@ -553,33 +553,43 @@ struct RegistrationView: View {
                                     
                                     // Date of Birth
                                     
-                                    Text(RegistrationLocalizer.t("select_dob"))
+                                    if((SessionManager.shared.barCode ?? "").isEmpty){
+                                        Text(RegistrationLocalizer.t("select_dob"))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .font(.system(size: 14))
+                                        
+                                        Button(action: {
+                                            showingDatePicker = true
+                                        }) {
+                                            HStack {
+                                                Text(dob, style: .date)
+                                                    .foregroundColor(dob == Date() ? .gray : .black)
+                                                Spacer()
+                                                Image(systemName: "calendar")
+                                            }
+                                            .padding()
+                                            .frame(maxWidth: .infinity)
+                                            .background(Color.white)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray, lineWidth: 1)
+                                            )
+                                        }
+                                        .sheet(isPresented: $showingDatePicker) {
+                                            DatePicker(RegistrationLocalizer.t("select_dob"), selection: $dob, displayedComponents: .date)
+                                                .datePickerStyle(GraphicalDatePickerStyle())
+                                                .labelsHidden()
+                                                .padding()
+                                        }
+                                    } else {
+                                        HStack {
+                                            Text("Date of Birth: ")
+                                                .bold() // makes the label bold
+                                            Text(dob, style: .date) // formats the date
+                                        }
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .font(.system(size: 14))
-                                    
-                                    Button(action: {
-                                        showingDatePicker = true
-                                    }) {
-                                        HStack {
-                                            Text(dob, style: .date)
-                                                .foregroundColor(dob == Date() ? .gray : .black)
-                                            Spacer()
-                                            Image(systemName: "calendar")
-                                        }
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray, lineWidth: 1)
-                                        )
-                                    }
-                                    .sheet(isPresented: $showingDatePicker) {
-                                        DatePicker(RegistrationLocalizer.t("select_dob"), selection: $dob, displayedComponents: .date)
-                                            .datePickerStyle(GraphicalDatePickerStyle())
-                                            .labelsHidden()
-                                            .padding()
                                     }
                                     
                                     // Category selection
@@ -1279,9 +1289,12 @@ struct RegistrationView: View {
                         mobileNumber = mobileNo
                         aadharNumber = aadharNo
                         let formatter = DateFormatter()
-                        formatter.dateFormat = "yyyy-MM-dd" // match the format of fdob
+                        formatter.locale = Locale(identifier: "en_US_POSIX")
+                        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
                         if let parsedDate = formatter.date(from: fdob) {
                             dob = parsedDate
+                        } else {
+                            print("Failed to parse fdob: \(fdob)")
                         }
                         fatherName = fName
                         passbookNumber = fpassBookNo

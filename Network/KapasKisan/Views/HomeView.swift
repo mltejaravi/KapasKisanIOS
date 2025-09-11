@@ -245,7 +245,13 @@ struct HomeView: View {
                                 Text(regStatus)
                                     .font(.system(size: 16))
                                     .foregroundColor(.gray)
-                                    .padding(.bottom, 16)
+                                    .padding(.bottom, 10)
+                                
+                                if let farmer = SessionManager.shared.farmerDetails, !(farmer.isActive ?? false) {
+                                    Text("Farmer is not approved")
+                                } else if let farmer = SessionManager.shared.farmerDetails, farmer.isActive ?? false {
+                                    Text("Farmer is approved")
+                                }
                                 
                                 Text(regRemarks)
                                     .font(.system(size: 18, weight: .medium))
