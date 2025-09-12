@@ -332,6 +332,8 @@ struct SlotBookingView: View {
     
     @State private var isSubmitting = false
     
+    @StateObject private var keyboard = KeyboardObserver.shared
+    
     // Sample data
     let availableSlots = ["9:00 AM", "11:00 AM", "2:00 PM", "4:00 PM"]
     @State private var gotoHome:Bool = false
@@ -509,14 +511,6 @@ struct SlotBookingView: View {
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .frame(width: 150, height: 48)
                                         .disabled(true)
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
                                 }
                                 
                                 // Approximate weight
@@ -528,14 +522,7 @@ struct SlotBookingView: View {
                                     .keyboardType(.decimalPad)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .frame(height: 48)
-                                    .toolbar {
-                                            ToolbarItemGroup(placement: .keyboard) {
-                                                Spacer()
-                                                Button("⌄") {
-                                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                }
-                                            }
-                                        }
+                                    
                                 
                                 // Available slots (shown conditionally)
                                 if showAvailableSlots {
@@ -633,6 +620,24 @@ struct SlotBookingView: View {
                         }
                     }
                 }
+//                .overlay(
+//                    Group {
+//                        if keyboard.isVisible {
+//                            Button("⌄") {
+//                                UIApplication.shared.sendAction(
+//                                    #selector(UIResponder.resignFirstResponder),
+//                                    to: nil,
+//                                    from: nil,
+//                                    for: nil
+//                                )
+//                            }
+//                            .padding()
+//                            .frame(maxWidth: .infinity)
+//                            .background(Color.gray.opacity(0.2))
+//                        }
+//                    },
+//                    alignment: .bottom
+//                )
                 
                 // Toast overlay
                 if showToast {

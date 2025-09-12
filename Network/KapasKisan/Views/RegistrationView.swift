@@ -333,6 +333,8 @@ class RegistrationLocalizer {
 }
 
 
+
+
 // MARK: - Registration View
 struct RegistrationView: View {
     // State variables for form fields
@@ -413,9 +415,12 @@ struct RegistrationView: View {
     
     @State private var goToSelectProfile = false
     
+    @StateObject private var keyboard = KeyboardObserver.shared
+    
     var body: some View {
         NavigationView {
             ZStack {
+                
                 // Background color
                 Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all)
                 
@@ -457,14 +462,6 @@ struct RegistrationView: View {
                                     TextField(RegistrationLocalizer.t("reg_number"), text: $registrationNumber)
                                         .disabled(true)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
                                     
                                     // Title selection
                                     Text(RegistrationLocalizer.t("select_title"))
@@ -503,26 +500,12 @@ struct RegistrationView: View {
                                     // Farmer Name
                                     TextField(RegistrationLocalizer.t("farmer_name"), text: $farmerName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                        
                                     
                                     // Father's Name
                                     TextField(RegistrationLocalizer.t("father_name"), text: $fatherName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                         
                                     
                                     // Gender selection
                                     Text(RegistrationLocalizer.t("select_gender"))
@@ -631,14 +614,7 @@ struct RegistrationView: View {
                                                 aadharNumber = filtered
                                             }
                                         }
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                         
                                     
                                     // Mobile Number
                                     TextField(RegistrationLocalizer.t("mobile_number"), text: $mobileNumber)
@@ -653,28 +629,14 @@ struct RegistrationView: View {
                                                 mobileNumber = filtered
                                             }
                                         }
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                        
                                 }
                                 
                                 Group {
                                     // Address
                                     TextField(RegistrationLocalizer.t("address"), text: $address)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                         
                                     
                                     // Land Details Section
                                     Text(RegistrationLocalizer.t("land_details"))
@@ -912,48 +874,44 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                     }
                                     
-                                    if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text1)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text2)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text3)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    }
-                                    if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
-                                        TextField(name, text: $text4)
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    if let barcode = SessionManager.shared.barCode, !barcode.isEmpty {
+                                        HStack {
+                                            Text("Passbook Number: ")
+                                                .bold()
+                                            Text(passbookNumber)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .font(.system(size: 14))
+                                    } else {
+                                        if let name = uniqueNames?.uniQ_ID_1_NAMING, !name.isEmpty {
+                                            TextField(name, text: $text1)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        }
+                                        if let name = uniqueNames?.uniQ_ID_2_NAMING, !name.isEmpty {
+                                            TextField(name, text: $text2)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        }
+                                        if let name = uniqueNames?.uniQ_ID_3_NAMING, !name.isEmpty {
+                                            TextField(name, text: $text3)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        }
+                                        if let name = uniqueNames?.uniQ_ID_4_NAMING, !name.isEmpty {
+                                            TextField(name, text: $text4)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        }
                                     }
                                     
                                     // Total Land
                                     TextField(RegistrationLocalizer.t("total_land"), text: $totalLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                         
                                     
                                     // Cotton Land
                                     TextField(RegistrationLocalizer.t("cotton_land"), text: $cottonLand)
                                         .keyboardType(.decimalPad)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        .toolbar {
-                                                ToolbarItemGroup(placement: .keyboard) {
-                                                    Spacer()
-                                                    Button("⌄") {
-                                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                    }
-                                                }
-                                            }
+                                         
                                     
                                     Text(RegistrationLocalizer.t("select_crop_type"))
                                         .font(.headline)
@@ -972,14 +930,7 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
-                                            .toolbar {
-                                                    ToolbarItemGroup(placement: .keyboard) {
-                                                        Spacer()
-                                                        Button("⌄") {
-                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                        }
-                                                    }
-                                                }
+                                            
                                     }
                                     
                                     // HDPS
@@ -995,14 +946,7 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
-                                            .toolbar {
-                                                    ToolbarItemGroup(placement: .keyboard) {
-                                                        Spacer()
-                                                        Button("⌄") {
-                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                        }
-                                                    }
-                                                }
+                                            
                                     }
                                     
                                     // Desi Cotton
@@ -1018,14 +962,7 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
-                                            .toolbar {
-                                                    ToolbarItemGroup(placement: .keyboard) {
-                                                        Spacer()
-                                                        Button("⌄") {
-                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                        }
-                                                    }
-                                                }
+                                            
                                     }
                                     
                                     // Closer Spacing
@@ -1041,14 +978,7 @@ struct RegistrationView: View {
                                             .textFieldStyle(RoundedBorderTextFieldStyle())
                                             .keyboardType(.decimalPad)
                                             .frame(height: 48)
-                                            .toolbar {
-                                                    ToolbarItemGroup(placement: .keyboard) {
-                                                        Spacer()
-                                                        Button("⌄") {
-                                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                                        }
-                                                    }
-                                                }
+                                           
                                     }
                                 }
                                 
@@ -1164,6 +1094,24 @@ struct RegistrationView: View {
                         }
                     }
                 }
+//                .overlay(
+//                    Group {
+//                        if keyboard.isVisible {
+//                            Button("⌄") {
+//                                UIApplication.shared.sendAction(
+//                                    #selector(UIResponder.resignFirstResponder),
+//                                    to: nil,
+//                                    from: nil,
+//                                    for: nil
+//                                )
+//                            }
+//                            .padding()
+//                            .frame(maxWidth: .infinity)
+//                            .background(Color.gray.opacity(0.2))
+//                        }
+//                    },
+//                    alignment: .bottom
+//                )
                 
                 // Toast overlay
                 if showToast {

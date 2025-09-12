@@ -276,6 +276,7 @@ struct LoginView: View {
     @State private var secondsRemaining = 180
     @State private var showLanguageSheet = false
     @State private var selectedLanguage = "ENGLISH"
+    @StateObject private var keyboard = KeyboardObserver.shared
     
     @StateObject private var trackingManager = TrackingPermissionManager()
     
@@ -339,14 +340,7 @@ struct LoginView: View {
                                 }
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .frame(height: 48)
-                                .toolbar {
-                                    ToolbarItemGroup(placement: .keyboard) {
-                                        Spacer()
-                                        Button("⌄") {
-                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                        }
-                                    }
-                                }
+                                
                             
                             if showInvalidMobileWarning {
                                 Text(LoginLocalizer.t("invalid_mobile"))
@@ -360,14 +354,7 @@ struct LoginView: View {
                                     .keyboardType(.numberPad)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .frame(height: 48)
-                                    .toolbar {
-                                        ToolbarItemGroup(placement: .keyboard) {
-                                            Spacer()
-                                            Button("⌄") {
-                                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                            }
-                                        }
-                                    }
+                                     
                             }
                             
                             if showInvalidOtpWarning {
@@ -481,6 +468,24 @@ struct LoginView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 35)
                 .padding(.bottom, 16)
+//                .overlay(
+//                    Group {
+//                        if keyboard.isVisible {
+//                            Button("⌄") {
+//                                UIApplication.shared.sendAction(
+//                                    #selector(UIResponder.resignFirstResponder),
+//                                    to: nil,
+//                                    from: nil,
+//                                    for: nil
+//                                )
+//                            }
+//                            .padding()
+//                            .frame(maxWidth: .infinity)
+//                            .background(Color.gray.opacity(0.2))
+//                        }
+//                    },
+//                    alignment: .bottom
+//                )
             }
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
